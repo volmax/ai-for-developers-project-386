@@ -11,7 +11,8 @@
     "test:run": "vitest run",
     "lint": "oxlint --deny-warnings --config oxlint.json",
     "format": "oxfmt --check",
-    "format:fix": "oxfmt"
+    "format:fix": "oxfmt",
+    "knip": "knip"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.1",
@@ -32,6 +33,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "jsdom": "^31.0.0",
+    "knip": "^5.50.0",
     "oxfmt": "^0.18.0",
     "oxlint": "^0.16.0",
     "postcss": "^8.5.2",

@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/knip/schema/knip.json",
+  "entry": ["src/main.tsx"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/components/index.ts",
+    "src/components/ui/index.ts",
+    "src/components/ui/button.tsx",
+    "src/lib/utils.ts"
+  ],
+  "ignoreDependencies": ["lucide-react", "postcss-load-config"]
+}
