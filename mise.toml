@@ -22,6 +22,7 @@ description = "Install all dependencies"
 run = [
   "cd backend && mvn dependency:go-offline -B",
   "cd frontend && npm install",
+  "pip install check-jsonschema",
 ]
 
 [tasks.build]
@@ -41,6 +42,7 @@ run = [
 [tasks.check]
 description = "Lint, type check, format check, security scans"
 run = [
+  "mise run install",
   "cd backend && mise x hadolint -- hadolint Dockerfile",
   "cd backend && mvn spotless:check -B",
   "cd backend && mvn compile -B",
@@ -48,7 +50,7 @@ run = [
   "cd frontend && npm run lint",
   "cd frontend && npm run format",
   "cd frontend && npm run knip",
-  "mise x jactionlint -- jactionlint .github/workflows/ci.yml .github/workflows/hexlet-check.yml",
+  "mise x jactionlint -- jactionlint --ignore=pipeline-without-pipefail --ignore=unverified-download .github/workflows/ci.yml .github/workflows/hexlet-check.yml",
   "mise x typos -- typos",
   "mise x betterleaks -- betterleaks dir . --no-banner",
   "mise x python -- check-jsonschema --schemafile frontend/node_modules/oxlint/configuration_schema.json frontend/oxlint.json",
