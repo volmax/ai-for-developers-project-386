@@ -6,6 +6,10 @@ java = "temurin-21"
 maven = "3.9"
 node = "22"
 hk = "latest"
+hadolint = "2.15.1"
+jactionlint = "2.4.0"
+typos = "1.52.0"
+betterleaks = "1.9.0"
 
 [env]
 _.file = ".env"
@@ -33,10 +37,17 @@ run = [
 ]
 
 [tasks.check]
-description = "Lint, type check, smoke test"
+description = "Lint, type check, format check, security scans"
 run = [
-  "cd backend && mvn test -B",
-  "cd frontend && npm run build && npm run test:run",
+  "cd backend && mise x hadolint -- hadolint Dockerfile",
+  "cd backend && mvn spotless:check -B -s /tmp/maven-settings.xml",
+  "cd frontend && mise x hadolint -- hadolint Dockerfile",
+  "cd frontend && npm run lint",
+  "cd frontend && npm run format",
+  "cd frontend && npm run knip",
+  "mise x jactionlint -- jactionlint .github/workflows/ci.yml .github/workflows/hexlet-check.yml",
+  "mise x typos -- typos",
+  "mise x betterleaks -- betterleaks dir . --no-banner",
 ]
 
 [tasks."start:backend"]
@@ -52,6 +63,13 @@ description = "Clean build artifacts"
 run = [
   "cd backend && mvn clean",
   "cd frontend && rm -rf dist",
+]
+
+[tasks.fix]
+description = "Auto-fix formatting and linting issues"
+run = [
+  "cd backend && mvn spotless:apply -B -s /tmp/maven-settings.xml",
+  "cd frontend && npm run format:fix",
 ]
 
 [daemons.backend]
