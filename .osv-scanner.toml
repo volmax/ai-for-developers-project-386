@@ -1,0 +1,12 @@
+# OSV-Scanner configuration
+# https://google.github.io/osv-scanner/
+
+# Ignore known vulnerabilities that are in dev dependencies
+# and do not affect production code
+[[IgnoredVulns]]
+id = "GHSA-5gmw-xhrv-c9v3"
+reason = "tinypool is a dev dependency used only during build; not present in production deployments"
+
+[[IgnoredVulns]]
+id = "GHSA-85c8-ppgw-ccpr"
+reason = "tinypool is a dev dependency used only during build; not present in production deployments"

@@ -11,6 +11,7 @@ hadolint = "2.15.1"
 jactionlint = "2.4.0"
 typos = "1.52.0"
 betterleaks = "1.9.0"
+osv-scanner = "2.7.0"
 
 [env]
 _.file = ".env"
@@ -53,6 +54,8 @@ run = [
   "mise x python -- check-jsonschema --schemafile frontend/node_modules/knip/schema.json frontend/knip.json",
   "mise x python -- check-jsonschema --schemafile https://json.schemastore.org/tsconfig frontend/tsconfig.json",
   "mise x python -- check-jsonschema --schemafile https://json.schemastore.org/package.json frontend/package.json",
+  "osv-scanner scan source --config=./.osv-scanner.toml -L ./frontend/package-lock.json",
+  "osv-scanner scan source --config=./.osv-scanner.toml --no-resolve -L ./backend/pom.xml",
 ]
 
 [tasks."start:backend"]
