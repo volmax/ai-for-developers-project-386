@@ -1,11 +1,7 @@
 const API_BASE = "/api";
 
 class ApiClient {
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
       method,
       headers: { "Content-Type": "application/json" },

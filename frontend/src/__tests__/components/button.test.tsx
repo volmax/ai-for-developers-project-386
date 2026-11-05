@@ -49,7 +49,7 @@ describe("Button", () => {
     render(
       <Button asChild>
         <a href="/test">Link Button</a>
-      </Button>
+      </Button>,
     );
     const link = screen.getByRole("link", { name: /link button/i });
     expect(link).toHaveAttribute("href", "/test");

@@ -32,9 +32,7 @@ describe("ApiClient", () => {
       statusText: "Internal Server Error",
     });
 
-    await expect(api.get("/health")).rejects.toThrow(
-      "API error 500: Internal Server Error"
-    );
+    await expect(api.get("/health")).rejects.toThrow("API error 500: Internal Server Error");
   });
 
   it("sends JSON body on POST", async () => {
@@ -52,7 +50,7 @@ describe("ApiClient", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ name: "test" }),
-      })
+      }),
     );
   });
 });

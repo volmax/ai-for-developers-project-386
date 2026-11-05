@@ -7,9 +7,7 @@ export default function App() {
         <h1 className="text-3xl font-bold">AI for Developers</h1>
       </header>
       <main>
-        <Button onClick={() => alert("Каркас работает!")}>
-          Нажми меня
-        </Button>
+        <Button onClick={() => alert("Каркас работает!")}>Нажми меня</Button>
       </main>
     </div>
   );
