@@ -43,6 +43,7 @@ description = "Lint, type check, format check, security scans"
 run = [
   "cd backend && mise x hadolint -- hadolint Dockerfile",
   "cd backend && mvn spotless:check -B -s /tmp/maven-settings.xml",
+  "cd backend && mvn compile -B -s /tmp/maven-settings.xml",
   "cd frontend && mise x hadolint -- hadolint Dockerfile",
   "cd frontend && npm run lint",
   "cd frontend && npm run format",
