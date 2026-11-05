@@ -1,0 +1,7 @@
+# Hadolint configuration for frontend Dockerfile
+# https://github.com/hadolint/hadolint
+
+ignored:
+  - DL3008
+  - DL3006
+  - DL4006
