@@ -42,8 +42,8 @@ run = [
 description = "Lint, type check, format check, security scans"
 run = [
   "cd backend && mise x hadolint -- hadolint Dockerfile",
-  "cd backend && mvn spotless:check -B -s /tmp/maven-settings.xml",
-  "cd backend && mvn compile -B -s /tmp/maven-settings.xml",
+  "cd backend && mvn spotless:check -B",
+  "cd backend && mvn compile -B",
   "cd frontend && mise x hadolint -- hadolint Dockerfile",
   "cd frontend && npm run lint",
   "cd frontend && npm run format",
@@ -77,7 +77,7 @@ run = [
 [tasks.fix]
 description = "Auto-fix formatting and linting issues"
 run = [
-  "cd backend && mvn spotless:apply -B -s /tmp/maven-settings.xml",
+  "cd backend && mvn spotless:apply -B",
   "cd frontend && npm run format:fix",
 ]
 
