@@ -1,0 +1,63 @@
+[settings]
+experimental = true
+
+[tools]
+java = "temurin-21"
+maven = "3.9"
+node = "22"
+hk = "latest"
+
+[env]
+_.file = ".env"
+SPRING_PROFILES_ACTIVE = "dev"
+
+[tasks.install]
+description = "Install all dependencies"
+run = [
+  "cd backend && mvn dependency:go-offline -B",
+  "cd frontend && npm install",
+]
+
+[tasks.build]
+description = "Build both projects"
+run = [
+  "cd backend && mvn package -DskipTests -B",
+  "cd frontend && npm run build",
+]
+
+[tasks.test]
+description = "Run all tests"
+run = [
+  "cd backend && mvn test -B",
+  "cd frontend && npm run test:run",
+]
+
+[tasks.check]
+description = "Lint, type check, smoke test"
+run = [
+  "cd backend && mvn test -B",
+  "cd frontend && npm run build && npm run test:run",
+]
+
+[tasks."start:backend"]
+description = "Start Spring Boot backend"
+run = "cd backend && mvn spring-boot:run -B"
+
+[tasks."start:frontend"]
+description = "Start Vite frontend dev server"
+run = "cd frontend && npm run dev"
+
+[tasks.clean]
+description = "Clean build artifacts"
+run = [
+  "cd backend && mvn clean",
+  "cd frontend && rm -rf dist",
+]
+
+[daemons.backend]
+run = "cd backend && mvn spring-boot:run -B"
+ready_port = 8080
+
+[daemons.frontend]
+run = "cd frontend && npm run dev"
+ready_port = 5173

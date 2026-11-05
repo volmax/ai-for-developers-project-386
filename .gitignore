@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Build outputs
+backend/target/
+frontend/dist/
+frontend/*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# mise
+.mise/
