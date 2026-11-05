@@ -1,0 +1,7 @@
+import Hooks
+
+hooks {
+  preCommit = [
+    "mise run check",
+  ]
+}
