@@ -5,6 +5,7 @@ experimental = true
 java = "temurin-21"
 maven = "3.9"
 node = "22"
+python = "3.12"
 hk = "latest"
 hadolint = "2.15.1"
 jactionlint = "2.4.0"
@@ -48,6 +49,10 @@ run = [
   "mise x jactionlint -- jactionlint .github/workflows/ci.yml .github/workflows/hexlet-check.yml",
   "mise x typos -- typos",
   "mise x betterleaks -- betterleaks dir . --no-banner",
+  "mise x python -- check-jsonschema --schemafile frontend/node_modules/oxlint/configuration_schema.json frontend/oxlint.json",
+  "mise x python -- check-jsonschema --schemafile frontend/node_modules/knip/schema.json frontend/knip.json",
+  "mise x python -- check-jsonschema --schemafile https://json.schemastore.org/tsconfig frontend/tsconfig.json",
+  "mise x python -- check-jsonschema --schemafile https://json.schemastore.org/package.json frontend/package.json",
 ]
 
 [tasks."start:backend"]

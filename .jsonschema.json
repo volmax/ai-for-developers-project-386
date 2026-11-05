@@ -1,0 +1,19 @@
+{
+  "description": "check-jsonschema configuration for JSON config validation",
+  "files": [
+    "frontend/oxlint.json",
+    "frontend/knip.json",
+    "frontend/tsconfig.json",
+    "frontend/package.json"
+  ],
+  "ignore": [
+    "frontend/package-lock.json"
+  ],
+  "schemas": {
+    "frontend/oxlint.json": "./frontend/node_modules/oxlint/configuration_schema.json",
+    "frontend/knip.json": "./frontend/node_modules/knip/schema.json",
+    "frontend/tsconfig.json": "https://json.schemastore.org/tsconfig",
+    "frontend/package.json": "https://json.schemastore.org/package.json"
+  },
+  "note": "Schemas are applied via mise tasks in mise.toml [tasks.check]"
+}
