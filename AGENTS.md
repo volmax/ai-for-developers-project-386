@@ -50,3 +50,17 @@ mise run fix        # авто-исправление: spotless:apply + oxfmt
 ## Инструменты
 
 - Всё зафиксировано в `mise.toml`
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked as GitHub issues via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `GLOSSARY.md` at root, `docs/adr/` for ADRs. See `docs/agents/domain.md`.
