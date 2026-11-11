@@ -1,14 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { Header } from "@/components/layout/Header";
+import { HomePage } from "@/components/pages/HomePage";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-background p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">AI for Developers</h1>
-      </header>
-      <main>
-        <Button onClick={() => alert("Каркас работает!")}>Нажми меня</Button>
-      </main>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-gray-50 to-orange-100">
+      <Header />
+      <HomePage />
     </div>
   );
 }

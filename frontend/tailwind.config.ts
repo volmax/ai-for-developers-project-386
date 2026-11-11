@@ -27,8 +27,8 @@ export default {
           foreground: "hsl(215.4 16.3% 46.9%)",
         },
         accent: {
-          DEFAULT: "hsl(210 40% 96.1%)",
-          foreground: "hsl(222.2 47.4% 11.2%)",
+          DEFAULT: "hsl(24 95% 53%)",
+          foreground: "hsl(0 0% 100%)",
         },
         popover: {
           DEFAULT: "hsl(0 0% 100%)",
