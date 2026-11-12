@@ -87,8 +87,8 @@ model PagedResult {
 interface Bookings {
   /** Получить список бронирований */
   @get list(
-    @query() $skip: int32 = 0,
-    @query() $top: int32 = 20
+    @query() $skip?: int32,
+    @query() $top?: int32
   ): PagedResult | ErrorResponse;
 
   /** Создать бронирование */

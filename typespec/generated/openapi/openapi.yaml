@@ -13,19 +13,17 @@ paths:
       parameters:
         - name: $skip
           in: query
-          required: true
+          required: false
           schema:
             type: integer
             format: int32
-            default: 0
           explode: false
         - name: $top
           in: query
-          required: true
+          required: false
           schema:
             type: integer
             format: int32
-            default: 20
           explode: false
       responses:
         '200':

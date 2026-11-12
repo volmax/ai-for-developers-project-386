@@ -115,9 +115,9 @@ export type $defs = Record<string, never>;
 export interface operations {
     Bookings_list: {
         parameters: {
-            query: {
-                $skip: number;
-                $top: number;
+            query?: {
+                $skip?: number;
+                $top?: number;
             };
             header?: never;
             path?: never;
