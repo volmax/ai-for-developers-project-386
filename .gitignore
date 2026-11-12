@@ -17,3 +17,6 @@ Thumbs.db
 
 # mise
 .mise/
+
+# Node
+node_modules/

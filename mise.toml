@@ -22,6 +22,7 @@ description = "Install all dependencies"
 run = [
   "cd backend && mvn dependency:go-offline -B",
   "cd frontend && npm install",
+  "cd typespec && npm install",
   "pip install check-jsonschema",
 ]
 
@@ -59,6 +60,7 @@ run = [
   "mise x python -- check-jsonschema --schemafile https://json.schemastore.org/package.json frontend/package.json",
   "osv-scanner scan source --config=./.osv-scanner.toml -L ./frontend/package-lock.json",
   "osv-scanner scan source --config=./.osv-scanner.toml --no-resolve -L ./backend/pom.xml",
+  "mise run check:contract",
 ]
 
 [tasks."start:backend"]
@@ -81,6 +83,16 @@ description = "Auto-fix formatting and linting issues"
 run = [
   "cd backend && mvn spotless:apply -B",
   "cd frontend && npm run format:fix",
+]
+
+[tasks."install:typespec"]
+description = "Install TypeSpec dependencies"
+run = "cd typespec && npm install"
+
+[tasks."check:contract"]
+description = "Generate OpenAPI and TypeScript client, verify no diff"
+run = [
+  "cd typespec && mise x node -- npm run check",
 ]
 
 [daemons.backend]
