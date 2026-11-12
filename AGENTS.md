@@ -66,6 +66,10 @@ Five canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `
 
 Single-context layout: `GLOSSARY.md` at root, `docs/adr/` for ADRs. See `docs/agents/domain.md`.
 
+### External references
+
+Ссылки на документацию фреймворков и библиотек: `docs/reference.md`.
+
 ### TypeSpec
 
 Контрактная цепочка: `typespec/`. Пinned-версии в `typespec/package.json` —
