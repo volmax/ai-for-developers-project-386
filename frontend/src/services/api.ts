@@ -1,5 +1,12 @@
 const API_BASE = "/api";
 
+export interface EventType {
+  id: string;
+  name: string;
+  description: string;
+  durationMinutes: number;
+}
+
 class ApiClient {
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -23,3 +30,7 @@ class ApiClient {
 }
 
 export const api = new ApiClient();
+
+export async function getEventTypes(): Promise<EventType[]> {
+  return api.get<EventType[]>("/event-types");
+}

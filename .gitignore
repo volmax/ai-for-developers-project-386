@@ -20,3 +20,7 @@ Thumbs.db
 
 # Node
 node_modules/
+
+# Playwright
+frontend/playwright-report/
+frontend/test-results/

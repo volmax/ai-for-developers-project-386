@@ -8,6 +8,7 @@
     "src/components/index.ts",
     "src/components/ui/index.ts",
     "src/components/ui/button.tsx",
+    "src/components/ui/card.tsx",
     "src/lib/utils.ts"
   ],
   "ignoreDependencies": ["lucide-react", "postcss-load-config"]

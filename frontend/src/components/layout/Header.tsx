@@ -11,6 +11,12 @@ export function Header() {
         </Link>
         <nav className="flex items-center gap-4">
           <Link
+            to="/events"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            События
+          </Link>
+          <Link
             to="/booking"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
