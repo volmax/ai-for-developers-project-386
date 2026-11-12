@@ -14,7 +14,7 @@ export interface paths {
         /** @description Получить предстоящие встречи */
         get: operations["Bookings_upcoming"];
         put?: never;
-        /** @description Создать бронирование */
+        /** @description Создать бронирование (201/409) */
         post: operations["Bookings_create"];
         delete?: never;
         options?: never;
@@ -110,6 +110,16 @@ export interface components {
              */
             createdAt: string;
         };
+        /** @description Ответ 409 — конфликт бронирования */
+        BookingConflict: {
+            code: string;
+            /** @description Описание ошибки */
+            message: string;
+        };
+        /** @description Ответ 201 — бронирование создано */
+        BookingCreated: {
+            booking: components["schemas"]["Booking"];
+        };
         /** @description Запрос на создание бронирования */
         BookingRequest: {
             /** @description ID типа события */
@@ -140,10 +150,18 @@ export interface components {
             /** @description Описание типа события */
             description: string;
             /**
-             * Format: int32
              * @description Длительность в минутах (15 или 30)
+             * @enum {number}
              */
-            durationMinutes: number;
+            durationMinutes: 15 | 30;
+        };
+        /** @description Ответ с количеством свободных слотов */
+        FreeSlotsCountResult: {
+            /**
+             * Format: int32
+             * @description Количество свободных слотов на дату
+             */
+            count: number;
         };
     };
     responses: never;
@@ -196,22 +214,22 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The request has succeeded. */
-            200: {
+            /** @description Ответ 201 — бронирование создано */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Booking"];
+                    "application/json": components["schemas"]["BookingCreated"];
                 };
             };
-            /** @description An unexpected error response. */
-            default: {
+            /** @description Ответ 409 — конфликт бронирования */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["BookingConflict"];
                 };
             };
         };
@@ -266,7 +284,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/plain": number;
+                    "application/json": components["schemas"]["FreeSlotsCountResult"];
                 };
             };
             /** @description An unexpected error response. */

@@ -10,21 +10,21 @@ paths:
   /api/bookings:
     post:
       operationId: Bookings_create
-      description: Создать бронирование
+      description: Создать бронирование (201/409)
       parameters: []
       responses:
-        '200':
-          description: The request has succeeded.
+        '201':
+          description: Ответ 201 — бронирование создано
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        default:
-          description: An unexpected error response.
+                $ref: '#/components/schemas/BookingCreated'
+        '409':
+          description: Ответ 409 — конфликт бронирования
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/BookingConflict'
       tags:
         - Bookings
       requestBody:
@@ -109,10 +109,9 @@ paths:
         '200':
           description: The request has succeeded.
           content:
-            text/plain:
+            application/json:
               schema:
-                type: integer
-                format: int32
+                $ref: '#/components/schemas/FreeSlotsCountResult'
         default:
           description: An unexpected error response.
           content:
@@ -189,6 +188,26 @@ components:
           format: date-time
           description: Дата создания
       description: Бронирование слота
+    BookingConflict:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Описание ошибки
+      description: Ответ 409 — конфликт бронирования
+    BookingCreated:
+      type: object
+      required:
+        - booking
+      properties:
+        booking:
+          $ref: '#/components/schemas/Booking'
+      description: Ответ 201 — бронирование создано
     BookingRequest:
       type: object
       required:
@@ -241,7 +260,19 @@ components:
           type: string
           description: Описание типа события
         durationMinutes:
-          type: integer
-          format: int32
+          type: number
+          enum:
+            - 15
+            - 30
           description: Длительность в минутах (15 или 30)
       description: Тип события (захардкожен)
+    FreeSlotsCountResult:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int32
+          description: Количество свободных слотов на дату
+      description: Ответ с количеством свободных слотов

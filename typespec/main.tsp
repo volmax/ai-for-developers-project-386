@@ -22,7 +22,7 @@ model EventType {
   description: string;
 
   /** Длительность в минутах (15 или 30) */
-  durationMinutes: int32;
+  durationMinutes: 15 | 30;
 }
 
 /**
@@ -75,6 +75,27 @@ model BookingRequest {
 }
 
 /**
+ * Ответ 201 — бронирование создано
+ */
+model BookingCreated {
+  /** Созданное бронирование */
+  @statusCode status: 201;
+  booking: Booking;
+}
+
+/**
+ * Ответ 409 — конфликт бронирования
+ */
+model BookingConflict {
+  /** Код ошибки */
+  @statusCode status: 409;
+  code: string;
+
+  /** Описание ошибки */
+  message: string;
+}
+
+/**
  * Ошибка
  */
 @error
@@ -84,6 +105,14 @@ model ErrorResponse {
 
   /** Описание ошибки */
   message: string;
+}
+
+/**
+ * Ответ с количеством свободных слотов
+ */
+model FreeSlotsCountResult {
+  /** Количество свободных слотов на дату */
+  count: int32;
 }
 
 /**
@@ -102,8 +131,8 @@ interface EventTypes {
 @route("/api/bookings")
 @tag("Bookings")
 interface Bookings {
-  /** Создать бронирование */
-  @post create(@body body: BookingRequest): Booking | ErrorResponse;
+  /** Создать бронирование (201/409) */
+  @post create(@body body: BookingRequest): BookingCreated | BookingConflict;
 
   /** Получить предстоящие встречи */
   @get upcoming(): Booking[] | ErrorResponse;
@@ -122,5 +151,5 @@ interface Bookings {
   freeSlotsCount(
     @query() eventTypeId: string,
     @query() date: string
-  ): int32 | ErrorResponse;
+  ): FreeSlotsCountResult | ErrorResponse;
 }
