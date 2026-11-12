@@ -64,3 +64,14 @@ Five canonical triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `
 ### Domain docs
 
 Single-context layout: `GLOSSARY.md` at root, `docs/adr/` for ADRs. See `docs/agents/domain.md`.
+
+### TypeSpec
+
+Контрактная цепочка: `typespec/`. Пinned-версии в `typespec/package.json` —
+читать перед `npm install`. Lockfile `typespec/package-lock.json` — canonical
+source, использовать `npm ci` или `npm install --package-lock-only`.
+
+Документация: https://typespec.io/docs
+
+Важно: синтаксис TypeSpec v1.x. Query-параметры с дефолтом — optional
+(например, `@query() skip?: int32 = 0`).
