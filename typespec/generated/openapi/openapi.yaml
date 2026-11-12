@@ -1,45 +1,13 @@
 openapi: 3.0.0
 info:
   title: Booking API
-  description: API для управления бронированиями
+  description: API для управления бронированиями календаря
   version: 0.0.0
 tags:
+  - name: EventTypes
   - name: Bookings
 paths:
   /api/bookings:
-    get:
-      operationId: Bookings_list
-      description: Получить список бронирований
-      parameters:
-        - name: $skip
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-          explode: false
-        - name: $top
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-          explode: false
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-        default:
-          description: An unexpected error response.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - Bookings
     post:
       operationId: Bookings_create
       description: Создать бронирование
@@ -65,23 +33,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/BookingRequest'
-  /api/bookings/{id}:
     get:
-      operationId: Bookings_get
-      description: Получить бронирование по ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      operationId: Bookings_upcoming
+      description: Получить предстоящие встречи
+      parameters: []
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
         default:
           description: An unexpected error response.
           content:
@@ -90,22 +54,32 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Bookings
-    patch:
-      operationId: Bookings_updateStatus
-      description: Обновить статус бронирования
+  /api/bookings/available-slots:
+    get:
+      operationId: Bookings_availableSlots
+      description: Получить доступные слоты
       parameters:
-        - name: id
-          in: path
+        - name: eventTypeId
+          in: query
           required: true
           schema:
             type: string
+          explode: false
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
       responses:
         '200':
           description: The request has succeeded.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
+                type: array
+                items:
+                  type: string
         default:
           description: An unexpected error response.
           content:
@@ -114,29 +88,53 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Bookings
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                status:
+  /api/bookings/free-slots-count:
+    get:
+      operationId: Bookings_freeSlotsCount
+      description: Получить количество свободных слотов
+      parameters:
+        - name: eventTypeId
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            text/plain:
+              schema:
+                type: integer
+                format: int32
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Bookings
+  /api/event-types:
+    get:
+      operationId: EventTypes_list
+      description: Получить список типов событий
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
                   $ref: '#/components/schemas/EventType'
-              required:
-                - status
-    delete:
-      operationId: Bookings_delete
-      description: Удалить бронирование
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
         default:
           description: An unexpected error response.
           content:
@@ -144,66 +142,73 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
-        - Bookings
+        - EventTypes
 components:
   schemas:
     Booking:
       type: object
       required:
         - id
-        - eventId
-        - userName
-        - userEmail
-        - seats
-        - status
+        - eventTypeId
+        - eventTypeName
+        - eventDurationMinutes
+        - slotStart
+        - slotEnd
+        - guestName
         - createdAt
       properties:
         id:
           type: string
           description: Уникальный идентификатор
-        eventId:
+        eventTypeId:
           type: string
-          description: ID события
-        userName:
+          description: ID типа события
+        eventTypeName:
           type: string
-          description: Имя пользователя
-        userEmail:
-          type: string
-          description: Email пользователя
-        seats:
+          description: Название типа события (денормализовано)
+        eventDurationMinutes:
           type: integer
           format: int32
-          description: Количество мест
-        status:
-          allOf:
-            - $ref: '#/components/schemas/EventType'
-          description: Статус бронирования
+          description: Длительность события в минутах (денормализовано)
+        slotStart:
+          type: string
+          format: date-time
+          description: Время начала бронирования
+        slotEnd:
+          type: string
+          format: date-time
+          description: Время окончания бронирования
+        guestName:
+          type: string
+          description: Имя гостя (обязательно)
+        guestEmail:
+          type: string
+          description: Email гостя (опционально)
         createdAt:
           type: string
           format: date-time
           description: Дата создания
-      description: Бронирование
+      description: Бронирование слота
     BookingRequest:
       type: object
       required:
-        - eventId
-        - userName
-        - userEmail
-        - seats
+        - eventTypeId
+        - slotStart
+        - guestName
       properties:
-        eventId:
+        eventTypeId:
           type: string
-          description: ID события
-        userName:
+          description: ID типа события
+        slotStart:
           type: string
-          description: Имя пользователя
-        userEmail:
+          format: date-time
+          description: Время начала слота (ISO 8601)
+        guestName:
           type: string
-          description: Email пользователя
-        seats:
-          type: integer
-          format: int32
-          description: Количество мест
+          description: Имя гостя (обязательно)
+        guestEmail:
+          type: string
+          description: Email гостя (опционально)
       description: Запрос на создание бронирования
     ErrorResponse:
       type: object
@@ -219,26 +224,24 @@ components:
           description: Описание ошибки
       description: Ошибка
     EventType:
-      type: string
-      enum:
-        - created
-        - confirmed
-        - cancelled
-        - completed
-      description: Тип события
-    PagedResult:
       type: object
       required:
-        - items
-        - totalCount
+        - id
+        - name
+        - description
+        - durationMinutes
       properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Booking'
-          description: Список бронирований
-        totalCount:
+        id:
+          type: string
+          description: Уникальный идентификатор
+        name:
+          type: string
+          description: Название типа события
+        description:
+          type: string
+          description: Описание типа события
+        durationMinutes:
           type: integer
           format: int32
-          description: Общее количество
-      description: Результат с пагинацией
+          description: Длительность в минутах (15 или 30)
+      description: Тип события (захардкожен)

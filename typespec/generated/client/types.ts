@@ -11,8 +11,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Получить список бронирований */
-        get: operations["Bookings_list"];
+        /** @description Получить предстоящие встречи */
+        get: operations["Bookings_upcoming"];
         put?: never;
         /** @description Создать бронирование */
         post: operations["Bookings_create"];
@@ -22,46 +22,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/bookings/{id}": {
+    "/api/bookings/available-slots": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description Получить бронирование по ID */
-        get: operations["Bookings_get"];
+        /** @description Получить доступные слоты */
+        get: operations["Bookings_availableSlots"];
         put?: never;
         post?: never;
-        /** @description Удалить бронирование */
-        delete: operations["Bookings_delete"];
+        delete?: never;
         options?: never;
         head?: never;
-        /** @description Обновить статус бронирования */
-        patch: operations["Bookings_updateStatus"];
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/free-slots-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Получить количество свободных слотов */
+        get: operations["Bookings_freeSlotsCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/event-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Получить список типов событий */
+        get: operations["EventTypes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description Бронирование */
+        /** @description Бронирование слота */
         Booking: {
             /** @description Уникальный идентификатор */
             id: string;
-            /** @description ID события */
-            eventId: string;
-            /** @description Имя пользователя */
-            userName: string;
-            /** @description Email пользователя */
-            userEmail: string;
+            /** @description ID типа события */
+            eventTypeId: string;
+            /** @description Название типа события (денормализовано) */
+            eventTypeName: string;
             /**
              * Format: int32
-             * @description Количество мест
+             * @description Длительность события в минутах (денормализовано)
              */
-            seats: number;
-            /** @description Статус бронирования */
-            status: components["schemas"]["EventType"];
+            eventDurationMinutes: number;
+            /**
+             * Format: date-time
+             * @description Время начала бронирования
+             */
+            slotStart: string;
+            /**
+             * Format: date-time
+             * @description Время окончания бронирования
+             */
+            slotEnd: string;
+            /** @description Имя гостя (обязательно) */
+            guestName: string;
+            /** @description Email гостя (опционально) */
+            guestEmail?: string;
             /**
              * Format: date-time
              * @description Дата создания
@@ -70,17 +112,17 @@ export interface components {
         };
         /** @description Запрос на создание бронирования */
         BookingRequest: {
-            /** @description ID события */
-            eventId: string;
-            /** @description Имя пользователя */
-            userName: string;
-            /** @description Email пользователя */
-            userEmail: string;
+            /** @description ID типа события */
+            eventTypeId: string;
             /**
-             * Format: int32
-             * @description Количество мест
+             * Format: date-time
+             * @description Время начала слота (ISO 8601)
              */
-            seats: number;
+            slotStart: string;
+            /** @description Имя гостя (обязательно) */
+            guestName: string;
+            /** @description Email гостя (опционально) */
+            guestEmail?: string;
         };
         /** @description Ошибка */
         ErrorResponse: {
@@ -89,20 +131,19 @@ export interface components {
             /** @description Описание ошибки */
             message: string;
         };
-        /**
-         * @description Тип события
-         * @enum {string}
-         */
-        EventType: "created" | "confirmed" | "cancelled" | "completed";
-        /** @description Результат с пагинацией */
-        PagedResult: {
-            /** @description Список бронирований */
-            items: components["schemas"]["Booking"][];
+        /** @description Тип события (захардкожен) */
+        EventType: {
+            /** @description Уникальный идентификатор */
+            id: string;
+            /** @description Название типа события */
+            name: string;
+            /** @description Описание типа события */
+            description: string;
             /**
              * Format: int32
-             * @description Общее количество
+             * @description Длительность в минутах (15 или 30)
              */
-            totalCount: number;
+            durationMinutes: number;
         };
     };
     responses: never;
@@ -113,12 +154,9 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    Bookings_list: {
+    Bookings_upcoming: {
         parameters: {
-            query?: {
-                $skip?: number;
-                $top?: number;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -131,7 +169,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PagedResult"];
+                    "application/json": components["schemas"]["Booking"][];
                 };
             };
             /** @description An unexpected error response. */
@@ -178,13 +216,14 @@ export interface operations {
             };
         };
     };
-    Bookings_get: {
+    Bookings_availableSlots: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+            query: {
+                eventTypeId: string;
+                date: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -195,7 +234,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Booking"];
+                    "application/json": string[];
                 };
             };
             /** @description An unexpected error response. */
@@ -209,23 +248,26 @@ export interface operations {
             };
         };
     };
-    Bookings_delete: {
+    Bookings_freeSlotsCount: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+            query: {
+                eventTypeId: string;
+                date: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description There is no content to send for this request, but the headers may be useful.  */
-            204: {
+            /** @description The request has succeeded. */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "text/plain": number;
+                };
             };
             /** @description An unexpected error response. */
             default: {
@@ -238,22 +280,14 @@ export interface operations {
             };
         };
     };
-    Bookings_updateStatus: {
+    EventTypes_list: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                id: string;
-            };
+            path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": {
-                    status: components["schemas"]["EventType"];
-                };
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description The request has succeeded. */
             200: {
@@ -261,7 +295,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Booking"];
+                    "application/json": components["schemas"]["EventType"][];
                 };
             };
             /** @description An unexpected error response. */
