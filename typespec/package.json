@@ -1,0 +1,20 @@
+{
+  "name": "app-contracts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "compile": "tsp compile . --output-dir generated/openapi",
+    "generate-client": "openapi-typescript generated/openapi/openapi.yaml -o generated/client/types.ts",
+    "check": "npm run compile && npm run generate-client && git diff --exit-code generated/"
+  },
+  "dependencies": {
+    "@typespec/compiler": "1.18.0",
+    "@typespec/http": "1.18.0",
+    "@typespec/openapi3": "1.18.0",
+    "@typespec/rest": "0.88.0",
+    "openapi-typescript": "7.5.0"
+  },
+  "devDependencies": {
+    "@typespec/versioning": "0.88.0"
+  }
+}
