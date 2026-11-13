@@ -89,11 +89,18 @@ run = [
 description = "Install TypeSpec dependencies"
 run = "cd typespec && npm install"
 
+[tasks."install:contract"]
+description = "Install TypeSpec dependencies"
+dir = "typespec"
+sources = ["package.json", "package-lock.json"]
+outputs = ["node_modules/.package-lock.json"]
+run = "npm ci"
+
 [tasks."check:contract"]
 description = "Generate OpenAPI and TypeScript client, verify no diff"
-run = [
-  "cd typespec && mise x node -- npm run check",
-]
+depends = ["install:contract"]
+dir = "typespec"
+run = "npm run check"
 
 [daemons.backend]
 run = "cd backend && mvn spring-boot:run -B"
