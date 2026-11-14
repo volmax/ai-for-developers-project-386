@@ -138,7 +138,7 @@ export function BookingPage() {
     let cancelled = false;
     async function fetch() {
       try {
-        const slots = await getAvailableSlots(eventType.id, dateStr);
+        const slots = await getAvailableSlots(eventType!.id, dateStr);
         if (!cancelled) {
           setAvailableSlots(slots);
           setSelectedSlot(null);

@@ -115,7 +115,7 @@ export function Calendar({
             <button
               key={index}
               disabled={outOfWindow}
-              onClick={() => onSelectDate(item.date)}
+              onClick={() => onSelectDate(item.date!)}
               className={`
                 relative min-h-[60px] rounded-lg p-2 text-left transition-colors
                 ${
