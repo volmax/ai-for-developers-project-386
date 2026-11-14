@@ -74,7 +74,7 @@ export function BookingPage() {
       try {
         const data = await getEventTypes();
         if (!cancelled) {
-          const found = data.find((e) => e.id === eventTypeId);
+          const found = data.find((e) => String(e.id) === eventTypeId);
           setEventType(found || null);
           setIsLoading(false);
         }

@@ -52,6 +52,12 @@ mise run fix        # авто-исправление: spotless:apply + oxfmt
 
 - Всё зафиксировано в `mise.toml`
 
+## Playwright E2E-тесты
+
+- Использовать **только** MCP-сервер `playwright-docker`. Не запускать `npx playwright test` напрямую.
+- **Запрещено** устанавливать браузеры в систему (`playwright install`, `apt install chromium`, и т.п.).
+- Браузер Playwright MCP работает в Docker-контейнере. Для доступа к локальному dev-серверу запускайте его с флагом `--host` (Vite) и используйте IP хоста (`hostname -I | awk '{print $1}'`) вместо `localhost`.
+
 ## Agent skills
 
 ### Issue tracker
