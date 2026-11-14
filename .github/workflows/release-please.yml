@@ -27,6 +27,7 @@ jobs:
         id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          skip-github-pull-request: true
 
       - name: Tag release
         if: ${{ steps.release.outputs.release_created }}
