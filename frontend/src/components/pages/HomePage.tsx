@@ -17,7 +17,7 @@ export function HomePage() {
           <p className="mb-6 max-w-md text-base leading-relaxed text-muted-foreground">
             Забронируйте встречу за минуту: выберите тип события и удобное время.
           </p>
-          <Link to="/booking">
+          <Link to="/events">
             <Button variant="accent" size="lg" className="gap-2">
               Записаться
               <svg
