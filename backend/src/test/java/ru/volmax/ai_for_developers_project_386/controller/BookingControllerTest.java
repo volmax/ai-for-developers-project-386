@@ -1,8 +1,10 @@
 package ru.volmax.ai_for_developers_project_386.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -88,5 +90,34 @@ class BookingControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CONFLICT"))
                 .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void upcomingShouldReturn200WithBookings() throws Exception {
+        mockMvc.perform(get("/api/bookings/upcoming"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void availableSlotsShouldReturn200WithSlots() throws Exception {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        mockMvc.perform(
+                        get("/api/bookings/available-slots")
+                                .param("eventTypeId", "1")
+                                .param("date", tomorrow.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
+    void freeSlotsCountShouldReturn200WithCount() throws Exception {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        mockMvc.perform(
+                        get("/api/bookings/free-slots-count")
+                                .param("eventTypeId", "1")
+                                .param("date", tomorrow.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 }
