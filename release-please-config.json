@@ -1,0 +1,20 @@
+{
+  "packages": {
+    "backend": {
+      "release-type": "java"
+    },
+    "frontend": {
+      "release-type": "node"
+    }
+  },
+  "changelog-sections": [
+    {"type": "feat", "section": "Features"},
+    {"type": "fix", "section": "Fixes"},
+    {"type": "refactor", "section": "Refactors"},
+    {"type": "test", "section": "Tests"},
+    {"type": "docs", "section": "Docs"},
+    {"type": "chore", "section": "Chore"}
+  ],
+  "group-pull-request-title-pattern": "changetype[scope]: ${nextVersion}",
+  "include-component-in-tag": false
+}
