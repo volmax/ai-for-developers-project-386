@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,11 @@ class BookingControllerTest {
 
     @Test
     void createBookingShouldReturn201() throws Exception {
-        LocalDateTime slotStart = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
+        LocalDateTime slotStart =
+                LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                        .plusDays(1)
+                        .withHour(10)
+                        .withMinute(0);
         String json =
                 """
                 {
@@ -54,7 +59,11 @@ class BookingControllerTest {
 
     @Test
     void createOverlappingBookingShouldReturn409() throws Exception {
-        LocalDateTime slotStart = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
+        LocalDateTime slotStart =
+                LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                        .plusDays(1)
+                        .withHour(10)
+                        .withMinute(0);
         String json1 =
                 """
                 {
