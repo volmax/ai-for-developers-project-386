@@ -15,3 +15,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+calendar:
+  owner:
+    name: "${CALENDAR_OWNER_NAME:Владелец календаря}"
+    email: "${CALENDAR_OWNER_EMAIL:owner@example.com}"

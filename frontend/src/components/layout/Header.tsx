@@ -14,13 +14,13 @@ export function Header() {
             to="/events"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            События
+            Записаться
           </Link>
           <Link
-            to="/booking"
+            to="/admin/meetings"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            Записаться
+            Админка
           </Link>
         </nav>
       </div>

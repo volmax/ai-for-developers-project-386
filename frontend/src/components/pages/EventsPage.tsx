@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getEventTypes, type EventType } from "@/services/api";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -59,27 +59,29 @@ export function EventsPage() {
   return (
     <div className="min-h-[calc(100vh-3.5rem)] px-4 py-12">
       <div className="mx-auto max-w-5xl">
-        <h1 className="mb-8 text-3xl font-bold tracking-tight">Типы событий</h1>
+        <h1 className="mb-2 text-3xl font-bold tracking-tight">Выберите тип события</h1>
+        <p className="mb-8 text-muted-foreground">
+          Нажмите на карточку, чтобы открыть календарь и выбрать удобный слот
+        </p>
 
         {eventTypes.length === 0 ? (
           <p className="text-muted-foreground">Нет доступных событий.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {eventTypes.map((event) => (
-              <Card key={event.id}>
-                <CardHeader>
-                  <CardTitle>{event.name}</CardTitle>
-                  <CardDescription>{event.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{event.durationMinutes} мин</span>
-                  <Link to={`/booking?event=${event.id}`}>
-                    <Button variant="accent" size="sm">
-                      Записаться
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <Link key={event.id} to={`/booking/${event.id}`}>
+                <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>{event.name}</CardTitle>
+                      <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
+                        {event.durationMinutes} мин
+                      </span>
+                    </div>
+                    <CardDescription>{event.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
             ))}
           </div>
         )}

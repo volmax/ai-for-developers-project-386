@@ -2,10 +2,11 @@ package ru.volmax.ai_for_developers_project_386.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import ru.volmax.ai_for_developers_project_386.data.BookingRequest;
 import ru.volmax.ai_for_developers_project_386.entity.Booking;
@@ -18,18 +19,24 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final EventTypeRepository eventTypeRepository;
+    private final SlotService slotService;
 
     public BookingService(
-            BookingRepository bookingRepository, EventTypeRepository eventTypeRepository) {
+            BookingRepository bookingRepository,
+            EventTypeRepository eventTypeRepository,
+            SlotService slotService) {
         this.bookingRepository = bookingRepository;
         this.eventTypeRepository = eventTypeRepository;
+        this.slotService = slotService;
     }
 
+    /** Create a new booking with pessimistic locking to prevent concurrent double-booking. */
+    @Transactional
     public Booking create(BookingRequest request) {
         // A. Validate booking window: tomorrow (inclusive) to 14 days from tomorrow (inclusive)
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
         LocalDate windowStart = today.plusDays(1);
-        LocalDate windowEnd = today.plusDays(15).minusDays(1); // 14 days from tomorrow = today + 15
+        LocalDate windowEnd = today.plusDays(15).minusDays(1);
 
         LocalDate requestedDate = request.getSlotStart().toLocalDate();
 
@@ -42,31 +49,35 @@ public class BookingService {
                             + " включительно");
         }
 
-        // B. Overlap detection
-        LocalDateTime slotStart = request.getSlotStart();
-        // Calculate slotEnd later after we know the duration, but for overlap check we need a
-        // provisional end.
-        // First, look up the event type to get duration.
-        Optional<EventType> eventTypeOpt =
-                eventTypeRepository.findById(Long.parseLong(request.getEventTypeId()));
-        if (eventTypeOpt.isEmpty()) {
-            throw new IllegalStateException("Тип события не найден: " + request.getEventTypeId());
-        }
+        // B. Look up event type
+        Long eventTypeId = Long.parseLong(request.getEventTypeId());
+        EventType eventType =
+                eventTypeRepository
+                        .findById(eventTypeId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "Тип события не найден: "
+                                                        + request.getEventTypeId()));
 
-        EventType eventType = eventTypeOpt.get();
         int durationMinutes = eventType.getDurationMinutes();
+        LocalDateTime slotStart = request.getSlotStart();
         LocalDateTime slotEnd = slotStart.plusMinutes(durationMinutes);
 
-        // Check for overlapping bookings
+        // C. Pessimistic locking: lock overlapping bookings to prevent race conditions
         List<Booking> overlappingBookings =
-                bookingRepository.findBySlotStartBeforeAndSlotEndAfter(slotStart, slotEnd);
+                bookingRepository.findBySlotStartBeforeAndSlotEndForUpdate(slotStart, slotEnd);
 
-        if (!overlappingBookings.isEmpty()) {
-            throw new IllegalStateException(
-                    "Выбранное время пересекается с существующим бронированием");
+        // D. Overlap detection (re-check against locked rows)
+        for (Booking existing : overlappingBookings) {
+            if (slotService.isOverlapping(
+                    slotStart, slotEnd, existing.getSlotStart(), existing.getSlotEnd())) {
+                throw new IllegalStateException(
+                        "Выбранное время пересекается с существующим бронированием");
+            }
         }
 
-        // C. Create and save booking
+        // E. Create and save booking
         Booking booking =
                 new Booking(
                         null,
@@ -77,8 +88,15 @@ public class BookingService {
                         slotEnd,
                         request.getGuestName(),
                         request.getGuestEmail(),
-                        LocalDateTime.now());
+                        LocalDateTime.now(ZoneId.of("Europe/Moscow")));
 
         return bookingRepository.save(booking);
+    }
+
+    /** Get upcoming bookings (today and future). */
+    public List<Booking> getUpcoming() {
+        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDateTime fromDateTime = today.atStartOfDay();
+        return bookingRepository.findUpcomingBookings(fromDateTime);
     }
 }

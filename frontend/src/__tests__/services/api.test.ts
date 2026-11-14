@@ -30,9 +30,21 @@ describe("ApiClient", () => {
       ok: false,
       status: 500,
       statusText: "Internal Server Error",
+      text: async () => "",
     });
 
     await expect(api.get("/health")).rejects.toThrow("API error 500: Internal Server Error");
+  });
+
+  it("throws with error message from response body", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 409,
+      statusText: "Conflict",
+      text: async () => '{"code":"CONFLICT","message":"Слот занят"}',
+    });
+
+    await expect(api.get("/health")).rejects.toThrow("Слот занят");
   });
 
   it("sends JSON body on POST", async () => {
