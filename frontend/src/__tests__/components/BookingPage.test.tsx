@@ -481,7 +481,7 @@ describe("BookingPage — создание бронирования", () => {
   });
 
   it("отображает ошибку при конфликте (409)", async () => {
-    const conflictError = new Error("Слот занят") as { status: number; message: string };
+    const conflictError = new Error("Слот занят") as unknown as { status: number; message: string };
     conflictError.status = 409;
     mockCreateBooking.mockRejectedValue(conflictError);
 
@@ -504,7 +504,10 @@ describe("BookingPage — создание бронирования", () => {
   });
 
   it("отображает общую ошибку при другой ошибке", async () => {
-    const genericError = new Error("Неизвестная ошибка") as { status: number; message: string };
+    const genericError = new Error("Неизвестная ошибка") as unknown as {
+      status: number;
+      message: string;
+    };
     genericError.status = 500;
     mockCreateBooking.mockRejectedValue(genericError);
 
