@@ -59,5 +59,17 @@ test.describe("Smoke Test — полный путь бронирования", (
     await expect(page.getByText("Бронирование создано!")).toBeVisible();
     await expect(page.getByText("Тестовый Гость")).toBeVisible();
     await expect(page.getByText("test@example.com")).toBeVisible();
+
+    // Step 9: Verify "Забронировать ещё" button is present and links to /events
+    await expect(page.getByRole("link", { name: "Забронировать ещё" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Забронировать ещё" })).toHaveAttribute(
+      "href",
+      "/events",
+    );
+
+    // Step 10: Click "Забронировать ещё" → navigate to events page
+    await page.getByRole("link", { name: "Забронировать ещё" }).click();
+    await expect(page).toHaveURL("/events");
+    await expect(page.getByRole("heading", { name: "Выберите тип события" })).toBeVisible();
   });
 });
