@@ -117,3 +117,448 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
     await waitFor(() => expect(screen.getByText("Events Page")).toBeInTheDocument());
   });
 });
+
+describe("BookingPage — базовый рендеринг", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockGetEventTypes.mockResolvedValue([
+      {
+        id: "1",
+        name: "Встреча 15 минут",
+        description: "Короткий тип события",
+        durationMinutes: 15,
+      },
+    ]);
+
+    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetFreeSlotsCount.mockResolvedValue(1);
+  });
+
+  it("отображает 'Загрузка...' при загрузке", () => {
+    mockGetEventTypes.mockReturnValue(new Promise(() => {}));
+
+    renderWithRouter("/booking/1");
+    expect(screen.getByText(/загрузка/i)).toBeInTheDocument();
+  });
+
+  it("отображает информацию о событии после загрузки", async () => {
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    // Use heading level to uniquely identify event name
+    expect(screen.getByRole("heading", { name: "Встреча 15 минут", level: 3 })).toBeInTheDocument();
+    expect(screen.getByText("15 мин")).toBeInTheDocument();
+    expect(screen.getByText("Короткий тип события")).toBeInTheDocument();
+    expect(screen.getByText("Host")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Календарь" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Статус слотов" })).toBeInTheDocument();
+  });
+
+  it("отображает 'Тип события не найден' при отсутствии события", async () => {
+    mockGetEventTypes.mockResolvedValue([]);
+
+    renderWithRouter("/booking/999");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    expect(screen.getByText("Тип события не найден")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /к каталогу событий/i })).toHaveAttribute(
+      "href",
+      "/events",
+    );
+  });
+
+  it("отображает 'Выберите дату', когда дата не выбрана", async () => {
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    expect(screen.getByText("Выберите дату")).toBeInTheDocument();
+  });
+});
+
+describe("BookingPage — выбор даты и слота", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockGetEventTypes.mockResolvedValue([
+      {
+        id: "1",
+        name: "Встреча 15 минут",
+        description: "Короткий тип события",
+        durationMinutes: 15,
+      },
+    ]);
+
+    mockGetAvailableSlots.mockResolvedValue([
+      "2026-11-16T09:00:00",
+      "2026-11-16T09:15:00",
+      "2026-11-16T10:00:00",
+    ]);
+    mockGetFreeSlotsCount.mockResolvedValue(3);
+  });
+
+  it("отображает слоты при выборе даты", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    // Click on day 16
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    // Verify slots appear
+    await waitFor(() => {
+      expect(screen.getByText("09:00")).toBeInTheDocument();
+      expect(screen.getByText("09:15")).toBeInTheDocument();
+      expect(screen.getByText("10:00")).toBeInTheDocument();
+    });
+
+    // Verify each slot has "Свободно" status
+    const allSlots = screen.getAllByText("Свободно");
+    expect(allSlots.length).toBe(3);
+  });
+
+  it("отображает 'Нет свободных слотов', когда слотов нет", async () => {
+    mockGetAvailableSlots.mockResolvedValue([]);
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Нет свободных слотов")).toBeInTheDocument();
+    });
+  });
+
+  it("отображает выбранную дату в блоке 'Выбранная дата'", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Выбранная дата" })).toBeInTheDocument();
+    });
+  });
+
+  it("отображает 'Время не выбрано', когда дата выбрана но слот нет", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Время не выбрано")).toBeInTheDocument();
+    });
+  });
+
+  it("отображает выбранное время после выбора слота", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Выбранное время" })).toBeInTheDocument();
+    });
+  });
+
+  it("подсвечивает выбранный слот", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+
+    const slotButton = screen.getByText("09:00").closest("button");
+    await user.click(slotButton!);
+
+    // Check that the slot has accent styles (bg-accent class)
+    await waitFor(() => {
+      expect(slotButton).toHaveClass("bg-accent");
+    });
+  });
+});
+
+describe("BookingPage — форма бронирования", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockGetEventTypes.mockResolvedValue([
+      {
+        id: "1",
+        name: "Встреча 15 минут",
+        description: "Короткий тип события",
+        durationMinutes: 15,
+      },
+    ]);
+
+    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetFreeSlotsCount.mockResolvedValue(1);
+  });
+
+  it("отображает форму бронирования после выбора слота", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Бронирование" })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("Ваше имя")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("email@example.com")).toBeInTheDocument();
+    });
+  });
+
+  it("отображает кнопку 'Назад'", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await waitFor(() => {
+      const backButton = screen.getByRole("button", { name: /назад/i });
+      expect(backButton).toBeInTheDocument();
+      expect(backButton.closest("a")).toHaveAttribute("href", "/events");
+    });
+  });
+
+  it("кнопка 'Продолжить' disabled без имени", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await waitFor(() => {
+      const continueButton = screen.getByRole("button", { name: /продолжить/i });
+      expect(continueButton).toBeDisabled();
+    });
+  });
+
+  it("кнопка 'Продолжить' enabled когда заполнено имя", async () => {
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест");
+
+    await waitFor(() => {
+      const continueButton = screen.getByRole("button", { name: /продолжить/i });
+      expect(continueButton).toBeEnabled();
+    });
+  });
+});
+
+describe("BookingPage — создание бронирования", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    mockGetEventTypes.mockResolvedValue([
+      {
+        id: "1",
+        name: "Встреча 15 минут",
+        description: "Короткий тип события",
+        durationMinutes: 15,
+      },
+    ]);
+
+    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetFreeSlotsCount.mockResolvedValue(1);
+  });
+
+  it("создаёт бронирование при нажатии 'Продолжить'", async () => {
+    mockCreateBooking.mockResolvedValue(createMockBooking());
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.type(screen.getByPlaceholderText("email@example.com"), "test@example.com");
+
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => expect(mockCreateBooking).toHaveBeenCalled());
+
+    const expectedCall = {
+      eventTypeId: "1",
+      slotStart: "2026-11-16T09:00:00",
+      guestName: "Тест Гость",
+      guestEmail: "test@example.com",
+    };
+    expect(mockCreateBooking).toHaveBeenCalledWith(expectedCall);
+  });
+
+  it("отображает подтверждение после успешного бронирования", async () => {
+    mockCreateBooking.mockResolvedValue(
+      createMockBooking({
+        guestName: "Тест Гость",
+        guestEmail: "test@example.com",
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.type(screen.getByPlaceholderText("email@example.com"), "test@example.com");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/бронирование создано/i)).toBeInTheDocument();
+      // Check guest name in confirmation using custom matcher since text may be split
+      expect(screen.getByText(/тест гость/i)).toBeInTheDocument();
+      expect(screen.getByText(/email: test@example\.com/i)).toBeInTheDocument();
+    });
+  });
+
+  it("отображает 'Создание...' при отправке формы", async () => {
+    mockCreateBooking.mockReturnValue(
+      new Promise((resolve) => setTimeout(() => resolve(createMockBooking()), 1000)),
+    );
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Создание...")).toBeInTheDocument();
+    });
+  });
+
+  it("отображает ошибку при конфликте (409)", async () => {
+    const conflictError = new Error("Слот занят") as { status: number; message: string };
+    conflictError.status = 409;
+    mockCreateBooking.mockRejectedValue(conflictError);
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Ошибка")).toBeInTheDocument();
+      expect(screen.getByText("Слот занят")).toBeInTheDocument();
+    });
+  });
+
+  it("отображает общую ошибку при другой ошибке", async () => {
+    const genericError = new Error("Неизвестная ошибка") as { status: number; message: string };
+    genericError.status = 500;
+    mockCreateBooking.mockRejectedValue(genericError);
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Ошибка")).toBeInTheDocument();
+      expect(screen.getByText("Неизвестная ошибка")).toBeInTheDocument();
+    });
+  });
+
+  it("не показывает форму бронирования, когда слот не выбран", async () => {
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    // Should not show booking form header
+    expect(screen.queryByRole("heading", { name: "Бронирование" })).not.toBeInTheDocument();
+  });
+
+  it("отображает бронирование без email, если email пустой", async () => {
+    mockCreateBooking.mockResolvedValue(
+      createMockBooking({
+        guestName: "Тест Гость",
+        guestEmail: null,
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/бронирование создано/i)).toBeInTheDocument();
+      expect(screen.getByText(/тест гость/i)).toBeInTheDocument();
+      expect(screen.queryByText("Email:")).not.toBeInTheDocument();
+    });
+  });
+});
