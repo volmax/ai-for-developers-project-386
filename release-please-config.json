@@ -18,10 +18,6 @@
         {
           "type": "json",
           "path": "frontend/package.json"
-        },
-        {
-          "type": "json",
-          "path": "backend/pom.xml"
         }
       ]
     }
