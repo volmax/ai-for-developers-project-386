@@ -1,5 +1,7 @@
 {
   "release-type": "java",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
   "changelog-sections": [
     {"type": "feat", "section": "Features"},
     {"type": "fix", "section": "Fixes"},
