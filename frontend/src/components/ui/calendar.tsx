@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { getMoscowToday } from "@/lib/timezone";
 
 interface CalendarProps {
   year: number;
@@ -56,8 +57,7 @@ export function Calendar({
   }, [year, month]);
 
   const isOutOfWindow = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getMoscowToday();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const windowEnd = new Date(bookingWindowEnd);

@@ -12,6 +12,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { getMoscowToday } from "@/lib/timezone";
 
 function formatDateRu(date: Date): string {
   const days = ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"];
@@ -59,9 +60,9 @@ export function BookingPage() {
   const [bookingError, setBookingError] = useState<string | null>(null);
 
   // Calculate booking window: tomorrow (inclusive) to tomorrow + 13 days (inclusive) = 14 calendar days
+  // Use Moscow timezone to match backend (BookingService.java)
   const tomorrow = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getMoscowToday();
     const result = new Date(today);
     result.setDate(result.getDate() + 1);
     return result;
