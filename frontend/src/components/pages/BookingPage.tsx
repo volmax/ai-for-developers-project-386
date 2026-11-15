@@ -351,13 +351,14 @@ export function BookingPage() {
                       </Button>
                     </Link>
                   </div>
-                ) : bookingError ? (
-                  <div className="space-y-2">
-                    <p className="font-medium text-destructive">Ошибка</p>
-                    <p className="text-sm text-muted-foreground">{bookingError}</p>
-                  </div>
                 ) : (
                   <>
+                    {bookingError && (
+                      <div className="space-y-1 rounded-md bg-destructive/10 p-3">
+                        <p className="font-medium text-destructive">Ошибка</p>
+                        <p className="text-sm text-muted-foreground">{bookingError}</p>
+                      </div>
+                    )}
                     <div>
                       <label className="mb-1 block text-sm font-medium">Имя *</label>
                       <input
