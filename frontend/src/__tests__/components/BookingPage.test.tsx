@@ -538,6 +538,36 @@ describe("BookingPage — создание бронирования", () => {
     expect(screen.queryByRole("heading", { name: "Бронирование" })).not.toBeInTheDocument();
   });
 
+  it("отображает ошибку и сохраняет форму при невалидном email", async () => {
+    const validationError = new Error("Неверный формат email") as {
+      status: number;
+      message: string;
+    };
+    validationError.status = 400;
+    mockCreateBooking.mockRejectedValue(validationError);
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: /16/ }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+    await user.click(screen.getByText("09:00"));
+
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.type(screen.getByPlaceholderText("email@example.com"), "not-an-email");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Ошибка")).toBeInTheDocument();
+      expect(screen.getByText("Неверный формат email")).toBeInTheDocument();
+      // Форма должна оставаться видимой
+      expect(screen.getByPlaceholderText("Ваше имя")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("email@example.com")).toBeInTheDocument();
+    });
+  });
+
   it("отображает бронирование без email, если email пустой", async () => {
     mockCreateBooking.mockResolvedValue(
       createMockBooking({
