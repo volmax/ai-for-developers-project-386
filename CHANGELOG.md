@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.1...v0.1.2) (2026-11-15)
+
+
+### Bug Fixes
+
+* **frontend:** sync booking window timezone with backend ([#15](https://github.com/volmax/ai-for-developers-project-386/issues/15)) ([b84c624](https://github.com/volmax/ai-for-developers-project-386/commit/b84c62410a6f6df609bc69fbbd8add9e8fe011be))
+
 ## [0.1.1](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.0...v0.1.1) (2026-11-15)
 
 
