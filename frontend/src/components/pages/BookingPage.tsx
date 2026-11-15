@@ -344,6 +344,11 @@ export function BookingPage() {
                         Email: {bookingResult.guestEmail}
                       </p>
                     )}
+                    <Link to="/events">
+                      <Button variant="outline" className="mt-2 w-full">
+                        Забронировать ещё
+                      </Button>
+                    </Link>
                   </div>
                 ) : bookingError ? (
                   <div className="space-y-2">
