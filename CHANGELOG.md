@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.3...v0.1.4) (2026-11-15)
+
+
+### Bug Fixes
+
+* **booking:** keep form visible on validation error ([#20](https://github.com/volmax/ai-for-developers-project-386/issues/20)) ([234e954](https://github.com/volmax/ai-for-developers-project-386/commit/234e9540847294c26b5cc1ba1e90521417e1e196))
+
 ## [0.1.3](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.2...v0.1.3) (2026-11-15)
 
 
