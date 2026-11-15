@@ -1,0 +1,4 @@
+[default]
+extend-ignore-re = [
+    "\\b[a-f0-9]{7,40}\\b",
+]
