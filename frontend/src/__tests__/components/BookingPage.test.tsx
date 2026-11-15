@@ -539,7 +539,7 @@ describe("BookingPage — создание бронирования", () => {
   });
 
   it("отображает ошибку и сохраняет форму при невалидном email", async () => {
-    const validationError = new Error("Неверный формат email") as {
+    const validationError = new Error("Неверный формат email") as unknown as {
       status: number;
       message: string;
     };
