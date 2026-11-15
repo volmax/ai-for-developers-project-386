@@ -58,9 +58,11 @@ export function Calendar({
   const isOutOfWindow = (date: Date) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
     const windowEnd = new Date(bookingWindowEnd);
     windowEnd.setHours(0, 0, 0, 0);
-    return date < today || date > windowEnd;
+    return date < tomorrow || date > windowEnd;
   };
 
   const formatDateKey = (date: Date) => {

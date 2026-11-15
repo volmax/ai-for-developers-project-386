@@ -58,14 +58,20 @@ export function BookingPage() {
   const [bookingResult, setBookingResult] = useState<Booking | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
 
-  // Calculate booking window
-  const bookingWindowEnd = useMemo(() => {
+  // Calculate booking window: tomorrow (inclusive) to tomorrow + 13 days (inclusive) = 14 calendar days
+  const tomorrow = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const end = new Date(today);
-    end.setDate(end.getDate() + 14);
-    return end;
+    const result = new Date(today);
+    result.setDate(result.getDate() + 1);
+    return result;
   }, []);
+
+  const bookingWindowEnd = useMemo(() => {
+    const end = new Date(tomorrow);
+    end.setDate(end.getDate() + 13);
+    return end;
+  }, [tomorrow]);
 
   // Fetch event types
   useEffect(() => {
@@ -102,12 +108,10 @@ export function BookingPage() {
 
       for (let d = 1; d <= lastDay; d++) {
         const dayDate = new Date(date.getFullYear(), date.getMonth(), d);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
         const windowEnd = new Date(bookingWindowEnd);
         windowEnd.setHours(0, 0, 0, 0);
 
-        if (dayDate >= today && dayDate <= windowEnd) {
+        if (dayDate >= tomorrow && dayDate <= windowEnd) {
           const dateStr = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, "0")}-${String(dayDate.getDate()).padStart(2, "0")}`;
           try {
             const count = await getFreeSlotsCount(eventType.id, dateStr);
@@ -120,7 +124,7 @@ export function BookingPage() {
     }
 
     setFreeSlotsByDate(results);
-  }, [eventType, currentDate, bookingWindowEnd]);
+  }, [eventType, currentDate, tomorrow, bookingWindowEnd]);
 
   useEffect(() => {
     fetchFreeSlotsForDates();
