@@ -24,3 +24,4 @@ node_modules/
 # Playwright
 frontend/playwright-report/
 frontend/test-results/
+test-results/
