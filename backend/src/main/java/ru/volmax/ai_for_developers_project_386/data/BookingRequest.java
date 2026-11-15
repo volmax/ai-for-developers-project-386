@@ -2,14 +2,19 @@ package ru.volmax.ai_for_developers_project_386.data;
 
 import java.time.LocalDateTime;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class BookingRequest {
 
     private String eventTypeId;
 
     private LocalDateTime slotStart;
 
+    @NotBlank(message = "Guest name is required")
     private String guestName;
 
+    @Email(message = "Guest email must be a valid email address")
     private String guestEmail;
 
     public String getEventTypeId() {

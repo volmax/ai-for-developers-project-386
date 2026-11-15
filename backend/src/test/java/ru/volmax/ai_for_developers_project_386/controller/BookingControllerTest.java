@@ -129,4 +129,82 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
+
+    @Test
+    void createBookingWithEmptyGuestNameShouldReturn400() throws Exception {
+        LocalDateTime slotStart =
+                LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                        .plusDays(1)
+                        .withHour(10)
+                        .withMinute(0);
+        String json =
+                """
+                {
+                    "eventTypeId": "1",
+                    "slotStart": "%s",
+                    "guestName": "",
+                    "guestEmail": "test@example.com"
+                }
+                """
+                        .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        mockMvc.perform(
+                        post("/api/bookings/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void createBookingWithWhitespaceGuestNameShouldReturn400() throws Exception {
+        LocalDateTime slotStart =
+                LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                        .plusDays(1)
+                        .withHour(10)
+                        .withMinute(0);
+        String json =
+                """
+                {
+                    "eventTypeId": "1",
+                    "slotStart": "%s",
+                    "guestName": "   ",
+                    "guestEmail": "test@example.com"
+                }
+                """
+                        .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        mockMvc.perform(
+                        post("/api/bookings/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void createBookingWithInvalidEmailShouldReturn400() throws Exception {
+        LocalDateTime slotStart =
+                LocalDateTime.now(ZoneId.of("Europe/Moscow"))
+                        .plusDays(1)
+                        .withHour(10)
+                        .withMinute(0);
+        String json =
+                """
+                {
+                    "eventTypeId": "1",
+                    "slotStart": "%s",
+                    "guestName": "Test Guest",
+                    "guestEmail": "not-an-email"
+                }
+                """
+                        .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+        mockMvc.perform(
+                        post("/api/bookings/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
 }

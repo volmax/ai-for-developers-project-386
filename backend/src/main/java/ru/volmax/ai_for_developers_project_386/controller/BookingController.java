@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import ru.volmax.ai_for_developers_project_386.data.BookingRequest;
 import ru.volmax.ai_for_developers_project_386.entity.Booking;
 import ru.volmax.ai_for_developers_project_386.service.BookingService;
@@ -29,7 +32,7 @@ public class BookingController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> create(@RequestBody BookingRequest request) {
+    public ResponseEntity<?> create(@Valid @RequestBody BookingRequest request) {
         try {
             Booking booking = bookingService.create(request);
             return ResponseEntity.status(201).body(booking);
@@ -62,6 +65,16 @@ public class BookingController {
         LocalDate localDate = LocalDate.parse(date);
         int count = slotService.countFreeSlots(eventTypeId, localDate);
         return ResponseEntity.ok(count);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BookingConflict> handleValidation(MethodArgumentNotValidException ex) {
+        String message =
+                ex.getBindingResult().getFieldErrors().stream()
+                        .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                        .reduce((a, b) -> a + "; " + b)
+                        .orElse("Validation failed");
+        return ResponseEntity.status(400).body(new BookingConflict("VALIDATION_ERROR", message));
     }
 
     public record BookingConflict(String code, String message) {}
