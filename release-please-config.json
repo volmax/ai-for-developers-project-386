@@ -1,12 +1,5 @@
 {
-  "packages": {
-    "backend": {
-      "release-type": "java"
-    },
-    "frontend": {
-      "release-type": "node"
-    }
-  },
+  "release-type": "java",
   "changelog-sections": [
     {"type": "feat", "section": "Features"},
     {"type": "fix", "section": "Fixes"},
@@ -16,5 +9,11 @@
     {"type": "chore", "section": "Chore"}
   ],
   "group-pull-request-title-pattern": "changetype[scope]: ${nextVersion}",
-  "include-component-in-tag": false
+  "include-component-in-tag": false,
+  "extra-files": [
+    {
+      "type": "json",
+      "path": "frontend/package.json"
+    }
+  ]
 }
