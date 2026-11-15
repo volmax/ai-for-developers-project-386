@@ -14,12 +14,7 @@
       ],
       "group-pull-request-title-pattern": "changetype[scope]: ${nextVersion}",
       "include-component-in-tag": false,
-      "extra-files": [
-        {
-          "type": "json",
-          "path": "frontend/package.json"
-        }
-      ]
+      "extra-files": ["frontend/package.json"]
     }
   }
 }
