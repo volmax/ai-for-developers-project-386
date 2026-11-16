@@ -16,6 +16,15 @@ spring:
       enabled: true
       path: /h2-console
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when_authorized
+
 calendar:
   owner:
     name: "${CALENDAR_OWNER_NAME:Владелец календаря}"

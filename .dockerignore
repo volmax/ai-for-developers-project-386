@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+frontend/node_modules
+
+# Java
+target
+backend/target
+
+# Build output
+frontend/dist
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Env
+.env
+.env.*

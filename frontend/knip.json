@@ -3,6 +3,7 @@
   "entry": ["src/main.tsx"],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
+    "../typespec/generated/client/types.ts",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/components/index.ts",
@@ -11,5 +12,10 @@
     "src/components/ui/card.tsx",
     "src/lib/utils.ts"
   ],
-  "ignoreDependencies": ["lucide-react", "postcss-load-config"]
+  "ignoreDependencies": [
+    "lucide-react",
+    "postcss-load-config",
+    "../../typespec/generated/client/types"
+  ],
+  "ignoreUnresolved": ["../../typespec/generated/client/types"]
 }
