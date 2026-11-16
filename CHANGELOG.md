@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.9...v0.1.10) (2026-11-16)
+
+
+### Bug Fixes
+
+* **controller:** return FreeSlotsCountResult object instead of plain integer ([#41](https://github.com/volmax/ai-for-developers-project-386/issues/41)) ([#42](https://github.com/volmax/ai-for-developers-project-386/issues/42)) ([3791260](https://github.com/volmax/ai-for-developers-project-386/commit/3791260663a4f902f65e782804e15d5d1c6c4acd))
+
 ## [0.1.9](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.8...v0.1.9) (2026-11-16)
 
 
