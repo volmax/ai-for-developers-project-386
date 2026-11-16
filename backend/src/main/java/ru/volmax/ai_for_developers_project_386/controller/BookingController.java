@@ -60,11 +60,11 @@ public class BookingController {
     }
 
     @GetMapping("/free-slots-count")
-    public ResponseEntity<Integer> freeSlotsCount(
+    public ResponseEntity<FreeSlotsCountResult> freeSlotsCount(
             @RequestParam String eventTypeId, @RequestParam String date) {
         LocalDate localDate = LocalDate.parse(date);
         int count = slotService.countFreeSlots(eventTypeId, localDate);
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(new FreeSlotsCountResult(count));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -80,4 +80,6 @@ public class BookingController {
     public record BookingConflict(String code, String message) {}
 
     public record BookingCreated(Booking booking) {}
+
+    public record FreeSlotsCountResult(int count) {}
 }
