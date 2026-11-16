@@ -42,19 +42,16 @@ class BookingControllerTest {
                 """
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        mockMvc.perform(
-                        post("/api/bookings/")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
+        mockMvc.perform(post("/api/bookings").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.eventTypeId").value("1"))
-                .andExpect(jsonPath("$.eventTypeName").value("Консультация"))
-                .andExpect(jsonPath("$.guestName").value("Test Guest"))
-                .andExpect(jsonPath("$.guestEmail").value("test@example.com"))
-                .andExpect(jsonPath("$.slotStart").exists())
-                .andExpect(jsonPath("$.slotEnd").exists())
-                .andExpect(jsonPath("$.createdAt").exists());
+                .andExpect(jsonPath("$.booking.id").exists())
+                .andExpect(jsonPath("$.booking.eventTypeId").value("1"))
+                .andExpect(jsonPath("$.booking.eventTypeName").value("Консультация"))
+                .andExpect(jsonPath("$.booking.guestName").value("Test Guest"))
+                .andExpect(jsonPath("$.booking.guestEmail").value("test@example.com"))
+                .andExpect(jsonPath("$.booking.slotStart").exists())
+                .andExpect(jsonPath("$.booking.slotEnd").exists())
+                .andExpect(jsonPath("$.booking.createdAt").exists());
     }
 
     @Test
@@ -76,7 +73,7 @@ class BookingControllerTest {
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         mockMvc.perform(
-                        post("/api/bookings/")
+                        post("/api/bookings")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json1))
                 .andExpect(status().isCreated());
@@ -93,7 +90,7 @@ class BookingControllerTest {
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         mockMvc.perform(
-                        post("/api/bookings/")
+                        post("/api/bookings")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json2))
                 .andExpect(status().isConflict())
@@ -148,10 +145,7 @@ class BookingControllerTest {
                 """
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        mockMvc.perform(
-                        post("/api/bookings/")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
+        mockMvc.perform(post("/api/bookings").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
@@ -174,10 +168,7 @@ class BookingControllerTest {
                 """
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        mockMvc.perform(
-                        post("/api/bookings/")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
+        mockMvc.perform(post("/api/bookings").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
@@ -200,10 +191,7 @@ class BookingControllerTest {
                 """
                         .formatted(slotStart.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
-        mockMvc.perform(
-                        post("/api/bookings/")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json))
+        mockMvc.perform(post("/api/bookings").contentType(MediaType.APPLICATION_JSON).content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }

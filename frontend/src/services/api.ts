@@ -47,12 +47,12 @@ export async function getEventTypes(): Promise<EventType[]> {
 }
 
 export async function createBooking(request: BookingRequest): Promise<Booking> {
-  const response = await api.post<BookingCreated>("/bookings/", request);
+  const response = await api.post<BookingCreated>("/bookings", request);
   return response.booking;
 }
 
 export async function getUpcomingBookings(): Promise<Booking[]> {
-  return api.get<Booking[]>("/bookings");
+  return api.get<Booking[]>("/bookings/upcoming");
 }
 
 export async function getAvailableSlots(eventTypeId: string, date: string): Promise<string[]> {

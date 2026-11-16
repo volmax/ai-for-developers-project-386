@@ -148,7 +148,7 @@ describe("Booking API helpers", () => {
     };
     const result = await createBooking(request);
     expect(result).toEqual({ id: 1, eventTypeId: "1", guestName: "Test" });
-    expect(mockFetch).toHaveBeenCalledWith("/api/bookings/", {
+    expect(mockFetch).toHaveBeenCalledWith("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),

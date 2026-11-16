@@ -31,11 +31,11 @@ public class BookingController {
         this.slotService = slotService;
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody BookingRequest request) {
         try {
             Booking booking = bookingService.create(request);
-            return ResponseEntity.status(201).body(booking);
+            return ResponseEntity.status(201).body(new BookingCreated(booking));
         } catch (IllegalStateException ex) {
             String message = ex.getMessage();
             if (message != null && message.contains("пересекается")) {
@@ -78,4 +78,6 @@ public class BookingController {
     }
 
     public record BookingConflict(String code, String message) {}
+
+    public record BookingCreated(Booking booking) {}
 }
