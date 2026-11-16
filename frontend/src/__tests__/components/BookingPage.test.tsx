@@ -18,6 +18,16 @@ vi.mock("@/services/api", () => ({
   getUpcomingBookings: () => Promise.resolve([]),
 }));
 
+// Freeze "today" to a fixed date so tests are deterministic.
+// today = 2026-11-15 → tomorrow = 2026-11-16 (day 16)
+const FIXED_MOSCOW_TODAY = new Date(2026, 10, 15); // Nov 15, 00:00 Moscow
+const TOMORROW_DAY = 16;
+const TOMORROW_DATE_STR = "2026-11-16";
+
+vi.mock("@/lib/timezone", () => ({
+  getMoscowToday: () => FIXED_MOSCOW_TODAY,
+}));
+
 function renderWithRouter(initialRoute: string) {
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
@@ -35,8 +45,8 @@ function createMockBooking(overrides: Partial<Booking> = {}): Booking {
     eventTypeId: "1",
     eventTypeName: "Встреча 15 минут",
     eventDurationMinutes: 15,
-    slotStart: "2026-11-16T09:00:00",
-    slotEnd: "2026-11-16T09:15:00",
+    slotStart: `${TOMORROW_DATE_STR}T09:00:00`,
+    slotEnd: `${TOMORROW_DATE_STR}T09:15:00`,
     guestName: "Тест Гость",
     guestEmail: "test@example.com",
     createdAt: "2026-11-15T10:00:00",
@@ -47,8 +57,8 @@ function createMockBooking(overrides: Partial<Booking> = {}): Booking {
 async function bookSuccessfully(user: ReturnType<typeof userEvent.setup>) {
   await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-  // Select a date in the calendar (day 16)
-  await user.click(screen.getByRole("button", { name: /16/ }));
+  // Select a date in the calendar (tomorrow's day)
+  await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
   // Click on a slot
   await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
@@ -70,14 +80,17 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
       },
     ]);
 
-    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00", "2026-11-16T09:15:00"]);
+    mockGetAvailableSlots.mockResolvedValue([
+      `${TOMORROW_DATE_STR}T09:00:00`,
+      `${TOMORROW_DATE_STR}T09:15:00`,
+    ]);
 
     mockGetFreeSlotsCount.mockResolvedValue(2);
   });
@@ -124,14 +137,14 @@ describe("BookingPage — базовый рендеринг", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
       },
     ]);
 
-    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
     mockGetFreeSlotsCount.mockResolvedValue(1);
   });
 
@@ -185,7 +198,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
@@ -193,9 +206,9 @@ describe("BookingPage — выбор даты и слота", () => {
     ]);
 
     mockGetAvailableSlots.mockResolvedValue([
-      "2026-11-16T09:00:00",
-      "2026-11-16T09:15:00",
-      "2026-11-16T10:00:00",
+      `${TOMORROW_DATE_STR}T09:00:00`,
+      `${TOMORROW_DATE_STR}T09:15:00`,
+      `${TOMORROW_DATE_STR}T10:00:00`,
     ]);
     mockGetFreeSlotsCount.mockResolvedValue(3);
   });
@@ -206,8 +219,8 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    // Click on day 16
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    // Click on tomorrow's day
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     // Verify slots appear
     await waitFor(() => {
@@ -229,7 +242,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     await waitFor(() => {
       expect(screen.getByText("Нет свободных слотов")).toBeInTheDocument();
@@ -242,7 +255,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: "Выбранная дата" })).toBeInTheDocument();
@@ -255,7 +268,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     await waitFor(() => {
       expect(screen.getByText("Время не выбрано")).toBeInTheDocument();
@@ -268,7 +281,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
@@ -284,7 +297,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
 
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
 
@@ -304,14 +317,14 @@ describe("BookingPage — форма бронирования", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
       },
     ]);
 
-    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
     mockGetFreeSlotsCount.mockResolvedValue(1);
   });
 
@@ -321,7 +334,7 @@ describe("BookingPage — форма бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -338,7 +351,7 @@ describe("BookingPage — форма бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -355,7 +368,7 @@ describe("BookingPage — форма бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -371,7 +384,7 @@ describe("BookingPage — форма бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -390,14 +403,14 @@ describe("BookingPage — создание бронирования", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
       },
     ]);
 
-    mockGetAvailableSlots.mockResolvedValue(["2026-11-16T09:00:00"]);
+    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
     mockGetFreeSlotsCount.mockResolvedValue(1);
   });
 
@@ -409,7 +422,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -421,8 +434,8 @@ describe("BookingPage — создание бронирования", () => {
     await waitFor(() => expect(mockCreateBooking).toHaveBeenCalled());
 
     const expectedCall = {
-      eventTypeId: "1",
-      slotStart: "2026-11-16T09:00:00",
+      eventTypeId: 1,
+      slotStart: `${TOMORROW_DATE_STR}T09:00:00`,
       guestName: "Тест Гость",
       guestEmail: "test@example.com",
     };
@@ -442,7 +455,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -468,7 +481,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -490,7 +503,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -516,7 +529,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -551,7 +564,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
@@ -581,7 +594,7 @@ describe("BookingPage — создание бронирования", () => {
 
     await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
 
-    await user.click(screen.getByRole("button", { name: /16/ }));
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
     await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
     await user.click(screen.getByText("09:00"));
 
