@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.8...v0.1.9) (2026-11-16)
+
+
+### Bug Fixes
+
+* **api:** align booking endpoints with TypeSpec contract ([#1](https://github.com/volmax/ai-for-developers-project-386/issues/1)) ([#39](https://github.com/volmax/ai-for-developers-project-386/issues/39)) ([3a4cfb6](https://github.com/volmax/ai-for-developers-project-386/commit/3a4cfb6b1d9c74f32caaac9da2808cd52b615ddc))
+
 ## [0.1.8](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.7...v0.1.8) (2026-11-16)
 
 
