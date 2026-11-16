@@ -178,6 +178,18 @@ export function BookingPage() {
 
       const booking = await createBooking(request);
       setBookingResult(booking);
+
+      // Clear form state
+      setSelectedSlot(null);
+      setGuestName("");
+      setGuestEmail("");
+
+      // Refetch slots — the booked slot will disappear from the list
+      if (eventType && selectedDate) {
+        const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+        const slots = await getAvailableSlots(String(eventType.id), dateStr);
+        setAvailableSlots(slots);
+      }
     } catch (err: unknown) {
       const error = err as { status?: number; message?: string };
       if (error.status === 409) {
@@ -325,7 +337,7 @@ export function BookingPage() {
           </Card>
 
           {/* Booking Form */}
-          {selectedSlot && (
+          {(selectedSlot || bookingResult) && (
             <Card>
               <CardHeader>
                 <CardTitle>Бронирование</CardTitle>
