@@ -124,7 +124,8 @@ class BookingControllerTest {
                                 .param("eventTypeId", "1")
                                 .param("date", tomorrow.toString()))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.count").isNumber());
     }
 
     @Test
