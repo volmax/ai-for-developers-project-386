@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.6...v0.1.7) (2026-11-16)
+
+
+### Bug Fixes
+
+* Frontend uses generated SDK instead of hand-written api.ts ([#25](https://github.com/volmax/ai-for-developers-project-386/issues/25)) ([#34](https://github.com/volmax/ai-for-developers-project-386/issues/34)) ([5250da1](https://github.com/volmax/ai-for-developers-project-386/commit/5250da171a698afc8ae3fba1a4748653114ac41b))
+
 ## [0.1.6](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.5...v0.1.6) (2026-11-16)
 
 
