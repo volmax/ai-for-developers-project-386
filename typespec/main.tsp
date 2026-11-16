@@ -13,7 +13,7 @@ namespace Calendar;
  */
 model EventType {
   /** Уникальный идентификатор */
-  id: string;
+  id: int64;
 
   /** Название типа события */
   name: string;
@@ -30,7 +30,7 @@ model EventType {
  */
 model Booking {
   /** Уникальный идентификатор */
-  id: string;
+  id: int64;
 
   /** ID типа события */
   eventTypeId: string;

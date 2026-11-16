@@ -70,7 +70,7 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
@@ -124,7 +124,7 @@ describe("BookingPage — базовый рендеринг", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
@@ -185,7 +185,7 @@ describe("BookingPage — выбор даты и слота", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
@@ -304,7 +304,7 @@ describe("BookingPage — форма бронирования", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,
@@ -390,7 +390,7 @@ describe("BookingPage — создание бронирования", () => {
 
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,

@@ -79,8 +79,11 @@ export interface components {
     schemas: {
         /** @description Бронирование слота */
         Booking: {
-            /** @description Уникальный идентификатор */
-            id: string;
+            /**
+             * Format: int64
+             * @description Уникальный идентификатор
+             */
+            id: number;
             /** @description ID типа события */
             eventTypeId: string;
             /** @description Название типа события (денормализовано) */
@@ -143,8 +146,11 @@ export interface components {
         };
         /** @description Тип события (захардкожен) */
         EventType: {
-            /** @description Уникальный идентификатор */
-            id: string;
+            /**
+             * Format: int64
+             * @description Уникальный идентификатор
+             */
+            id: number;
             /** @description Название типа события */
             name: string;
             /** @description Описание типа события */
