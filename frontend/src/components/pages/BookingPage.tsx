@@ -115,7 +115,7 @@ export function BookingPage() {
         if (dayDate >= tomorrow && dayDate <= windowEnd) {
           const dateStr = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, "0")}-${String(dayDate.getDate()).padStart(2, "0")}`;
           try {
-            const count = await getFreeSlotsCount(eventType.id, dateStr);
+            const count = await getFreeSlotsCount(String(eventType.id), dateStr);
             results[dateStr] = count;
           } catch {
             results[dateStr] = 0;
@@ -143,7 +143,7 @@ export function BookingPage() {
     let cancelled = false;
     async function fetch() {
       try {
-        const slots = await getAvailableSlots(eventType!.id, dateStr);
+        const slots = await getAvailableSlots(String(eventType!.id), dateStr);
         if (!cancelled) {
           setAvailableSlots(slots);
           setSelectedSlot(null);
@@ -170,7 +170,7 @@ export function BookingPage() {
 
     try {
       const request: BookingRequest = {
-        eventTypeId: eventType!.id,
+        eventTypeId: String(eventType!.id),
         slotStart: selectedSlot,
         guestName: guestName.trim(),
         guestEmail: guestEmail.trim() || undefined,

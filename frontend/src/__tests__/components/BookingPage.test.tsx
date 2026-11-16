@@ -434,7 +434,7 @@ describe("BookingPage — создание бронирования", () => {
     await waitFor(() => expect(mockCreateBooking).toHaveBeenCalled());
 
     const expectedCall = {
-      eventTypeId: 1,
+      eventTypeId: "1",
       slotStart: `${TOMORROW_DATE_STR}T09:00:00`,
       guestName: "Тест Гость",
       guestEmail: "test@example.com",

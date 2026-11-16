@@ -47,6 +47,9 @@ mise run fix        # авто-исправление: spotless:apply + oxfmt
 - Breaking change: `BREAKING CHANGE: ...` в body или footer (MAJOR).
 - Scope в скобках: `feat(auth): add login`.
 - Описание — краткое, в повелительном наклонении, без точки в конце.
+- Каждый коммит реализации должен ссылаться на тикет в формате:
+  `feat(scope): description (#NN)`
+  Пример: `feat(booking): add conflict detection (#5)`
 
 ## Инструменты
 
@@ -86,3 +89,8 @@ source, использовать `npm ci` или `npm install --package-lock-onl
 
 Важно: синтаксис TypeSpec v1.x. Query-параметры с дефолтом — optional
 (например, `@query() skip?: int32 = 0`).
+
+Сгенерированные файлы в `typespec/generated/` нельзя править вручную.
+Все изменения должны вноситься только в исходный контракт (`typespec/main.tsp`)
+с последующей перегенерацией через `npm run compile && npm run generate-client`.
+CI проверяет, что `git diff generated/` пустой.

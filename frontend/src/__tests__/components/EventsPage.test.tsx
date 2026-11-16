@@ -33,13 +33,13 @@ describe("EventsPage", () => {
   it("отображает карточки событий после загрузки", async () => {
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события для быстрого слота",
         durationMinutes: 15,
       },
       {
-        id: "2",
+        id: 2,
         name: "Встреча 30 минут",
         description: "Базовый тип события для бронирования",
         durationMinutes: 30,
@@ -68,7 +68,7 @@ describe("EventsPage", () => {
   it("переходит на /booking/:eventTypeId при клике на карточку", async () => {
     mockGetEventTypes.mockResolvedValue([
       {
-        id: "1",
+        id: 1,
         name: "Встреча 15 минут",
         description: "Короткий тип события",
         durationMinutes: 15,

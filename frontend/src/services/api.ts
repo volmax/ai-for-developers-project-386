@@ -1,7 +1,7 @@
 const API_BASE = "/api";
 
 export interface EventType {
-  id: string;
+  id: number;
   name: string;
   description: string;
   durationMinutes: number;

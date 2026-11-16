@@ -157,7 +157,8 @@ components:
         - createdAt
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           description: Уникальный идентификатор
         eventTypeId:
           type: string
@@ -251,7 +252,8 @@ components:
         - durationMinutes
       properties:
         id:
-          type: string
+          type: integer
+          format: int64
           description: Уникальный идентификатор
         name:
           type: string
