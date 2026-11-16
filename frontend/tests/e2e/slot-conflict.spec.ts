@@ -52,7 +52,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
       tomorrow.setHours(hours, minutes, 0, 0);
       const isoLocal = tomorrow.toISOString().split(".")[0];
 
-      const resp = await fetch("/api/bookings/", {
+      const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,7 +123,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
       tomorrow.setHours(hours, minutes, 0, 0);
       const isoLocal = tomorrow.toISOString().split(".")[0];
 
-      const resp = await fetch("/api/bookings/", {
+      const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -171,7 +171,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
       tomorrow.setHours(hours, minutes, 0, 0);
       const isoLocal = tomorrow.toISOString().split(".")[0];
 
-      const resp = await fetch("/api/bookings/", {
+      const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
