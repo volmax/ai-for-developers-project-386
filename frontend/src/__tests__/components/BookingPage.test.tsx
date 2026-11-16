@@ -607,4 +607,56 @@ describe("BookingPage — создание бронирования", () => {
       expect(screen.queryByText("Email:")).not.toBeInTheDocument();
     });
   });
+
+  it("очищает выбранный слот и рефетчит список после успешного бронирования", async () => {
+    mockCreateBooking.mockResolvedValue(
+      createMockBooking({
+        guestName: "Тест Гость",
+        guestEmail: "test@example.com",
+      }),
+    );
+
+    // First call returns the slot (for initial load), second call returns empty (after booking)
+    mockGetAvailableSlots
+      .mockResolvedValueOnce([`${TOMORROW_DATE_STR}T09:00:00`])
+      .mockResolvedValueOnce([]);
+
+    const user = userEvent.setup();
+    renderWithRouter("/booking/1");
+
+    await waitFor(() => expect(screen.queryByText(/загрузка/i)).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: new RegExp(String(TOMORROW_DAY)) }));
+    await waitFor(() => expect(screen.getByText("09:00")).toBeInTheDocument());
+
+    // Click on the slot button (in the slots list, not in the info card)
+    const slotButtons = screen.getAllByRole("button", { name: /09:00/ });
+    const slotButton = slotButtons.find((btn) => btn.closest(".space-y-2"));
+    await user.click(slotButton!);
+
+    // Verify slot is highlighted
+    await waitFor(() => {
+      expect(slotButton).toHaveClass("bg-accent");
+    });
+
+    // Fill and submit the form
+    await user.type(screen.getByPlaceholderText("Ваше имя"), "Тест Гость");
+    await user.click(screen.getByRole("button", { name: /продолжить/i }));
+
+    await waitFor(() => {
+      expect(mockCreateBooking).toHaveBeenCalled();
+    });
+
+    // Verify the slot is removed from the list
+    await waitFor(() => {
+      expect(screen.queryByText("09:00")).not.toBeInTheDocument();
+      expect(screen.getByText("Нет свободных слотов")).toBeInTheDocument();
+    });
+
+    // Verify the success message is shown
+    await waitFor(() => {
+      expect(screen.getByText(/бронирование создано/i)).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /забронировать ещё/i })).toBeInTheDocument();
+    });
+  });
 });
