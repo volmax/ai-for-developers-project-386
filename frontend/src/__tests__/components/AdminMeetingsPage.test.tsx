@@ -69,7 +69,7 @@ describe("AdminMeetingsPage", () => {
       createMockBooking({
         id: 2,
         guestName: "Мария Сидорова",
-        guestEmail: null,
+        guestEmail: undefined,
         eventTypeName: "Встреча 30 минут",
         eventDurationMinutes: 30,
         slotStart: "2026-11-17T14:00:00",
@@ -101,10 +101,10 @@ describe("AdminMeetingsPage", () => {
     expect(screen.getByText(/14:30/i)).toBeInTheDocument();
   });
 
-  it("не отображает email, если он null", async () => {
+  it("не отображает email, если он не указан", async () => {
     mockGetUpcomingBookings.mockResolvedValue([
       createMockBooking({
-        guestEmail: null,
+        guestEmail: undefined,
       }),
     ]);
 

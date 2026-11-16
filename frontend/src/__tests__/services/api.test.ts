@@ -118,7 +118,7 @@ describe("Booking API helpers", () => {
       ok: true,
       status: 200,
       statusText: "OK",
-      json: async () => 12,
+      json: async () => ({ count: 12 }),
     });
 
     const result = await getFreeSlotsCount("1", "2026-11-16");
@@ -137,7 +137,7 @@ describe("Booking API helpers", () => {
       ok: true,
       status: 201,
       statusText: "Created",
-      json: async () => ({ id: 1, eventTypeId: "1", guestName: "Test" }),
+      json: async () => ({ booking: { id: 1, eventTypeId: "1", guestName: "Test" } }),
     });
 
     const request = {

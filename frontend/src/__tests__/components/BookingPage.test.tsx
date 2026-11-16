@@ -112,7 +112,7 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
   });
 
   it("переходит на /events при нажатии кнопки 'Забронировать ещё'", async () => {
-    mockCreateBooking.mockResolvedValue(createMockBooking({ guestEmail: null }));
+    mockCreateBooking.mockResolvedValue(createMockBooking({ guestEmail: undefined }));
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -585,7 +585,7 @@ describe("BookingPage — создание бронирования", () => {
     mockCreateBooking.mockResolvedValue(
       createMockBooking({
         guestName: "Тест Гость",
-        guestEmail: null,
+        guestEmail: undefined,
       }),
     );
 

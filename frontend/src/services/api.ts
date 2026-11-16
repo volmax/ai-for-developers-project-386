@@ -1,30 +1,12 @@
+import type { components } from "../../typespec/generated/client/types";
+
+type Booking = components["schemas"]["Booking"];
+type EventType = components["schemas"]["EventType"];
+type BookingRequest = components["schemas"]["BookingRequest"];
+type BookingCreated = components["schemas"]["BookingCreated"];
+type FreeSlotsCountResult = components["schemas"]["FreeSlotsCountResult"];
+
 const API_BASE = "/api";
-
-export interface EventType {
-  id: number;
-  name: string;
-  description: string;
-  durationMinutes: number;
-}
-
-export interface Booking {
-  id: number;
-  eventTypeId: string;
-  eventTypeName: string;
-  eventDurationMinutes: number;
-  slotStart: string;
-  slotEnd: string;
-  guestName: string;
-  guestEmail: string | null;
-  createdAt: string;
-}
-
-export interface BookingRequest {
-  eventTypeId: string;
-  slotStart: string;
-  guestName: string;
-  guestEmail?: string;
-}
 
 class ApiClient {
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -65,11 +47,12 @@ export async function getEventTypes(): Promise<EventType[]> {
 }
 
 export async function createBooking(request: BookingRequest): Promise<Booking> {
-  return api.post<Booking>("/bookings/", request);
+  const response = await api.post<BookingCreated>("/bookings/", request);
+  return response.booking;
 }
 
 export async function getUpcomingBookings(): Promise<Booking[]> {
-  return api.get<Booking[]>("/bookings/upcoming");
+  return api.get<Booking[]>("/bookings");
 }
 
 export async function getAvailableSlots(eventTypeId: string, date: string): Promise<string[]> {
@@ -77,5 +60,10 @@ export async function getAvailableSlots(eventTypeId: string, date: string): Prom
 }
 
 export async function getFreeSlotsCount(eventTypeId: string, date: string): Promise<number> {
-  return api.get<number>(`/bookings/free-slots-count?eventTypeId=${eventTypeId}&date=${date}`);
+  const response = await api.get<FreeSlotsCountResult>(
+    `/bookings/free-slots-count?eventTypeId=${eventTypeId}&date=${date}`,
+  );
+  return response.count;
 }
+
+export type { Booking, EventType, BookingRequest };

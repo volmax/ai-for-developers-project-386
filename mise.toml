@@ -44,10 +44,9 @@ run = [
 description = "Lint, type check, format check, security scans"
 run = [
   "mise run install",
-  "cd backend && mise x hadolint -- hadolint Dockerfile",
   "cd backend && mvn spotless:check -B",
   "cd backend && mvn compile -B",
-  "cd frontend && mise x hadolint -- hadolint Dockerfile",
+  "mise x hadolint -- hadolint Dockerfile",
   "cd frontend && npm run lint",
   "cd frontend && npm run format",
   "cd frontend && npm run knip",
