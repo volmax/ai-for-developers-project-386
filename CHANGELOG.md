@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.5...v0.1.6) (2026-11-16)
+
+
+### Bug Fixes
+
+* **typespec:** change id fields from string to int64 + fix BookingPage tests ([#31](https://github.com/volmax/ai-for-developers-project-386/issues/31)) ([ba9b756](https://github.com/volmax/ai-for-developers-project-386/commit/ba9b756ff30b12ac61c0f683e763e9744777ba9a))
+
 ## [0.1.5](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.4...v0.1.5) (2026-11-16)
 
 
