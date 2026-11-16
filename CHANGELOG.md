@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.7...v0.1.8) (2026-11-16)
+
+
+### Bug Fixes
+
+* **booking:** очищает слот и рефетчит список после бронирования ([#36](https://github.com/volmax/ai-for-developers-project-386/issues/36)) ([#37](https://github.com/volmax/ai-for-developers-project-386/issues/37)) ([cc5ed90](https://github.com/volmax/ai-for-developers-project-386/commit/cc5ed907ba7df665e67d6b8ea8c1084dd7057a11))
+
 ## [0.1.7](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.6...v0.1.7) (2026-11-16)
 
 
