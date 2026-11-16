@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.4](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.3...v0.1.4) (2026-11-15)
+
+
+### Bug Fixes
+
+* **booking:** keep form visible on validation error ([#20](https://github.com/volmax/ai-for-developers-project-386/issues/20)) ([234e954](https://github.com/volmax/ai-for-developers-project-386/commit/234e9540847294c26b5cc1ba1e90521417e1e196))
+
+## [0.1.3](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.2...v0.1.3) (2026-11-15)
+
+
+### Bug Fixes
+
+* **frontend:** fix TypeScript error in BookingPage test and remove duplicate E2E test ([#17](https://github.com/volmax/ai-for-developers-project-386/issues/17)) ([6001c32](https://github.com/volmax/ai-for-developers-project-386/commit/6001c32202238323a6e6747f1c8764e1bb5aff50))
+
 ## [0.1.2](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.1...v0.1.2) (2026-11-15)
 
 
