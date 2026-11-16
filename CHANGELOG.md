@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.4...v0.1.5) (2026-11-16)
+
+
+### Bug Fixes
+
+* **test:** make BookingPage tests date-independent by freezing getMoscowToday ([#29](https://github.com/volmax/ai-for-developers-project-386/issues/29)) ([8f45cdb](https://github.com/volmax/ai-for-developers-project-386/commit/8f45cdbea75750073604973e81a27d7940c89ace))
+
 ## [0.1.4](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.3...v0.1.4) (2026-11-15)
 
 
