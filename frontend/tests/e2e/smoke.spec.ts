@@ -60,14 +60,18 @@ test.describe("Smoke Test — полный путь бронирования", (
     await expect(page.getByText("Тестовый Гость")).toBeVisible();
     await expect(page.getByText("test@example.com")).toBeVisible();
 
-    // Step 9: Verify "Забронировать ещё" button is present and links to /events
+    // Step 9: Verify the booked slot (09:00) disappears from the list (issue #36)
+    await page.waitForTimeout(1000);
+    await expect(page.getByRole("button", { name: "09:00" })).not.toBeVisible();
+
+    // Step 10: Verify "Забронировать ещё" button is present and links to /events
     await expect(page.getByRole("link", { name: "Забронировать ещё" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Забронировать ещё" })).toHaveAttribute(
       "href",
       "/events",
     );
 
-    // Step 10: Click "Забронировать ещё" → navigate to events page
+    // Step 11: Click "Забронировать ещё" → navigate to events page
     await page.getByRole("link", { name: "Забронировать ещё" }).click();
     await expect(page).toHaveURL("/events");
     await expect(page.getByRole("heading", { name: "Выберите тип события" })).toBeVisible();
