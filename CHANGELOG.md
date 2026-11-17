@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.11...v0.1.12) (2026-11-17)
+
+
+### Bug Fixes
+
+* add PORT env var, fix README formatting, add data reset note ([#51](https://github.com/volmax/ai-for-developers-project-386/issues/51)) ([629adfd](https://github.com/volmax/ai-for-developers-project-386/commit/629adfd096b41fd5cdf4818a16f3f77ce7ff4bab))
+
 ## [0.1.11](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.10...v0.1.11) (2026-11-17)
 
 
