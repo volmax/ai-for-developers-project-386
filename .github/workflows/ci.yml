@@ -39,5 +39,8 @@ jobs:
       - name: Install mise
         run: curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise bash -s v2026.11.2
 
+      - name: Install dependencies
+        run: mise run install
+
       - name: Run tests
         run: mise run test
