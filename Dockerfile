@@ -63,4 +63,5 @@ EXPOSE 80 8080
 # hadolint ignore=DL3025
 CMD sh -c 'java -jar /app.jar & for i in $(seq 1 60); do wget -q -O /dev/null http://localhost:8080/actuator/health && break; sleep 1; done; nginx -g "daemon off;"'
 
-HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 CMD wget -q -O /dev/null http://localhost:80/ || exit 1
+# hadolint ignore=DL3025
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 CMD curl -sf http://localhost:80/ || exit 1
