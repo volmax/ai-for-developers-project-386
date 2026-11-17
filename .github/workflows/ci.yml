@@ -27,3 +27,17 @@ jobs:
 
       - name: Run checks
         run: mise run check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Install mise
+        run: curl https://mise.run | MISE_INSTALL_PATH=/usr/local/bin/mise bash -s v2026.11.2
+
+      - name: Run tests
+        run: mise run test
