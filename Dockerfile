@@ -57,16 +57,13 @@ COPY --from=build-backend /app/backend/target/*.jar /app.jar
 # Copy nginx config as template
 COPY nginx-docker.conf /etc/nginx/conf.d/default.conf.template
 
-# Install envsubst for PORT substitution
-RUN apk add --no-cache gettext
-
 ENV PORT=80
 
 EXPOSE $PORT 8081
 
 # Wait for backend to become healthy before starting nginx
 # hadolint ignore=DL3025
-CMD sh -c 'envsubst < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && java -jar /app.jar --server.port=8081 & for i in $(seq 1 60); do wget -q -O /dev/null http://localhost:8081/actuator/health && break; sleep 1; done; nginx -g "daemon off;"'
+CMD sh -c 'sed "s/__PORT__/$PORT/g" /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf && java -jar /app.jar --server.port=8081 & for i in $(seq 1 60); do wget -q -O /dev/null http://localhost:8081/actuator/health && break; sleep 1; done; nginx -g "daemon off;"'
 
 # hadolint ignore=DL3025
 HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 CMD curl -sf http://localhost:${PORT}/ || exit 1
