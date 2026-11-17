@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.10...v0.1.11) (2026-11-17)
+
+
+### Bug Fixes
+
+* **release-please:** include package-lock.json in extra-files ([#46](https://github.com/volmax/ai-for-developers-project-386/issues/46)) ([2421d74](https://github.com/volmax/ai-for-developers-project-386/commit/2421d7455c392b4630061a0019b65012e62dd330))
+
 ## [0.1.10](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.9...v0.1.10) (2026-11-16)
 
 
