@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.13](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.12...v0.1.13) (2026-11-19)
+
+
+### Reverts
+
+* откат слияния PR [#60](https://github.com/volmax/ai-for-developers-project-386/issues/60) ([#61](https://github.com/volmax/ai-for-developers-project-386/issues/61)) ([4ded6aa](https://github.com/volmax/ai-for-developers-project-386/commit/4ded6aac1d5dd1c8de8628a939696c564e3f388f))
+
 ## [0.1.12](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.11...v0.1.12) (2026-11-17)
 
 
