@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import ru.volmax.ai_for_developers_project_386.data.BookingRequest;
 import ru.volmax.ai_for_developers_project_386.entity.Booking;
@@ -38,6 +40,11 @@ class BookingServiceTest {
         SlotService slotService() {
             return org.mockito.Mockito.mock(SlotService.class);
         }
+    }
+
+    @BeforeEach
+    void setUp() {
+        bookingRepository.deleteAll();
     }
 
     // --- create ---
@@ -124,6 +131,52 @@ class BookingServiceTest {
         request.setGuestEmail("test@example.com");
 
         assertThrows(IllegalStateException.class, () -> bookingService.create(request));
+    }
+
+    @Test
+    void createBookingWithDuplicateSlotShouldThrow() {
+        LocalDateTime slotStart =
+                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(1).atTime(10, 0);
+
+        // First booking should succeed
+        BookingRequest firstRequest = new BookingRequest();
+        firstRequest.setEventTypeId("1");
+        firstRequest.setSlotStart(slotStart);
+        firstRequest.setGuestName("First Guest");
+        firstRequest.setGuestEmail("first@example.com");
+
+        when(slotService.isOverlapping(
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any(),
+                        org.mockito.ArgumentMatchers.any()))
+                .thenReturn(false);
+
+        // First booking
+        Booking firstBooking = bookingService.create(firstRequest);
+        assertNotNull(firstBooking.getId());
+
+        // Second booking with the same slotStart should fail
+        BookingRequest secondRequest = new BookingRequest();
+        secondRequest.setEventTypeId("1");
+        secondRequest.setSlotStart(slotStart);
+        secondRequest.setGuestName("Second Guest");
+        secondRequest.setGuestEmail("second@example.com");
+
+        assertThrows(
+                DataIntegrityViolationException.class,
+                () ->
+                        bookingRepository.save(
+                                new Booking(
+                                        null,
+                                        "1",
+                                        "Консультация",
+                                        15,
+                                        slotStart,
+                                        slotStart.plusMinutes(15),
+                                        "Second Guest",
+                                        "second@example.com",
+                                        LocalDateTime.now(ZoneId.of("Europe/Moscow")))));
     }
 
     // --- getUpcoming ---

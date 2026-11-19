@@ -16,3 +16,5 @@ CREATE TABLE IF NOT EXISTS booking (
     guest_email VARCHAR(255),
     created_at TIMESTAMP NOT NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS uk_slot_start ON booking (slot_start);
