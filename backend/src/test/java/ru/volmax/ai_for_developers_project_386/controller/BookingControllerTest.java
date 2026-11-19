@@ -24,6 +24,14 @@ class BookingControllerTest {
 
     @Autowired private MockMvc mockMvc;
 
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        jdbcTemplate.execute("DELETE FROM booking");
+        jdbcTemplate.execute("ALTER TABLE booking ALTER COLUMN id RESTART WITH 1");
+    }
+
     @Test
     void createBookingShouldReturn201() throws Exception {
         LocalDateTime slotStart =
