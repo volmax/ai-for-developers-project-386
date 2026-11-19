@@ -1,12 +1,14 @@
 package ru.volmax.ai_for_developers_project_386.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import ru.volmax.ai_for_developers_project_386.data.BookingRequest;
 import ru.volmax.ai_for_developers_project_386.entity.Booking;
@@ -31,7 +33,6 @@ public class BookingService {
     }
 
     /** Create a new booking with pessimistic locking to prevent concurrent double-booking. */
-    @Transactional
     public Booking create(BookingRequest request) {
         // A. Validate booking window: tomorrow (inclusive) to 14 days from tomorrow (inclusive)
         LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
@@ -64,11 +65,14 @@ public class BookingService {
         LocalDateTime slotStart = request.getSlotStart();
         LocalDateTime slotEnd = slotStart.plusMinutes(durationMinutes);
 
-        // C. Pessimistic locking: lock overlapping bookings to prevent race conditions
+        // C. Validate working hours
+        validateWorkingHours(slotStart, slotEnd, durationMinutes);
+
+        // D. Pessimistic locking: lock overlapping bookings to prevent race conditions
         List<Booking> overlappingBookings =
                 bookingRepository.findBySlotStartBeforeAndSlotEndForUpdate(slotStart, slotEnd);
 
-        // D. Overlap detection (re-check against locked rows)
+        // E. Overlap detection (re-check against locked rows)
         for (Booking existing : overlappingBookings) {
             if (slotService.isOverlapping(
                     slotStart, slotEnd, existing.getSlotStart(), existing.getSlotEnd())) {
@@ -77,7 +81,7 @@ public class BookingService {
             }
         }
 
-        // E. Create and save booking
+        // F. Create and save booking (with UNIQUE constraint protection)
         Booking booking =
                 new Booking(
                         null,
@@ -90,7 +94,47 @@ public class BookingService {
                         request.getGuestEmail(),
                         LocalDateTime.now(ZoneId.of("Europe/Moscow")));
 
-        return bookingRepository.save(booking);
+        try {
+            return bookingRepository.save(booking);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("Слот уже занят");
+        }
+    }
+
+    /**
+     * Validate that slotStart and slotEnd fall within working hours (09:00–18:00, Europe/Moscow),
+     * are on a working day (not weekend), and slotStart is aligned to the event duration.
+     */
+    private void validateWorkingHours(
+            LocalDateTime slotStart, LocalDateTime slotEnd, int durationMinutes) {
+        LocalDate date = slotStart.toLocalDate();
+        LocalTime startTime = slotStart.toLocalTime();
+        LocalTime endTime = slotEnd.toLocalTime();
+
+        // Check working day (not weekend)
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            throw new IllegalStateException("Бронирование невозможно в выходные дни");
+        }
+
+        // Check working hours: must start at or after 09:00 and end at or before 18:00
+        if (startTime.isBefore(LocalTime.of(9, 0))) {
+            throw new IllegalStateException("Бронирование возможно не ранее 09:00");
+        }
+
+        if (endTime.isAfter(LocalTime.of(18, 0))) {
+            throw new IllegalStateException("Бронирование должно заканчиваться не позже 18:00");
+        }
+
+        // Check slotStart alignment: must be a multiple of durationMinutes from 09:00
+        long minutesFromStart =
+                java.time.Duration.between(LocalTime.of(9, 0), startTime).toMinutes();
+        if (minutesFromStart % durationMinutes != 0) {
+            throw new IllegalStateException(
+                    "Начало бронирования должно быть кратно "
+                            + durationMinutes
+                            + " минутам от 09:00");
+        }
     }
 
     /** Get upcoming bookings (today and future). */

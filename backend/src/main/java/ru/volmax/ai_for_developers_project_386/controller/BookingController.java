@@ -3,6 +3,7 @@ package ru.volmax.ai_for_developers_project_386.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,6 +76,12 @@ public class BookingController {
                         .reduce((a, b) -> a + "; " + b)
                         .orElse("Validation failed");
         return ResponseEntity.status(400).body(new BookingConflict("VALIDATION_ERROR", message));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<BookingConflict> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex) {
+        return ResponseEntity.status(409).body(new BookingConflict("CONFLICT", "Слот уже занят"));
     }
 
     public record BookingConflict(String code, String message) {}
