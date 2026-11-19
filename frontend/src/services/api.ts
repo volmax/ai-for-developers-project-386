@@ -71,8 +71,7 @@ export async function createEventType(request: {
   description: string;
   durationMinutes: number;
 }): Promise<EventType> {
-  const response = await api.post<{ eventType: EventType }>("/event-types", request);
-  return response.eventType;
+  return api.post<EventType>("/event-types", request);
 }
 
 export type { Booking, EventType, BookingRequest };

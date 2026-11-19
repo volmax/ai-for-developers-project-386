@@ -2,6 +2,7 @@ package ru.volmax.ai_for_developers_project_386.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,6 @@ public class EventTypeController {
     @PostMapping
     public ResponseEntity<EventType> create(@RequestBody EventTypeCreateRequest request) {
         EventType eventType = eventTypeService.create(request);
-        return ResponseEntity.status(201).body(eventType);
+        return ResponseEntity.status(HttpStatus.CREATED).body(eventType);
     }
 }
