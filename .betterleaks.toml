@@ -1,0 +1,5 @@
+[allowlist]
+description = "Ignore Playwright HTML reports (false positive: test error strings)"
+paths = [
+    'frontend/playwright-report/',
+]

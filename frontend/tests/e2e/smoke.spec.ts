@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Smoke Test — полный путь бронирования", () => {
+  test.beforeAll(async ({ request }) => {
+    await test.step("Reset database state", async () => {
+      await request.post("/api/admin/reset");
+    });
+  });
+
   test("should book a consultation from homepage", async ({ page }) => {
     // Step 1: Start from homepage
     await page.goto("/");
@@ -15,7 +21,7 @@ test.describe("Smoke Test — полный путь бронирования", (
 
     // Verify events page
     await expect(page.getByRole("heading", { name: "Выберите тип события" })).toBeVisible();
-    await expect(page.getByText("Консультация")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Консультация" })).toBeVisible();
     await expect(page.getByText("Глубокое погружение")).toBeVisible();
 
     // Step 3: Click "Консультация" card → navigate to /booking/1

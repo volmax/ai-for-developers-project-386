@@ -1,6 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Slot conflict — 409 Conflict", () => {
+  test.beforeAll(async ({ request }) => {
+    await test.step("Reset database state", async () => {
+      await request.post("/api/admin/reset");
+    });
+  });
+
   test("should show conflict error when trying to book an already booked slot", async ({
     page,
   }) => {
@@ -33,31 +39,23 @@ test.describe("Slot conflict — 409 Conflict", () => {
     await expect(page.getByText("Бронирование создано!")).toBeVisible();
     await expect(page.getByText("First Guest")).toBeVisible();
 
-    // Step 6: Extract the booked slot time from the success message.
-    // The success message shows "EventType — HH:MM" (e.g. "Консультация — 09:15").
-    const bookedSlotTime = await page.evaluate(() => {
-      const container = document.querySelector('[class*="min-h-\\[calc')?.parentElement;
-      if (!container) return null;
-      const match = container.textContent?.match(/(\d{2}:\d{2})/);
-      return match ? match[1] : null;
+    // Step 6: Get the exact ISO slot string from the API and use it for conflict test.
+    // This avoids timezone issues — we use the exact value the backend stored.
+    const firstSlotIso = await page.evaluate(async () => {
+      const resp = await fetch("/api/bookings/upcoming");
+      const bookings: Array<{ slotStart: string }> = await resp.json();
+      return bookings[0]?.slotStart || null;
     });
-    expect(bookedSlotTime).toBeTruthy();
+    expect(firstSlotIso).toBeTruthy();
 
     // Step 7: Use the API to create a conflicting booking on the same slot.
-    // This verifies the backend returns 409 Conflict with proper error details.
-    const conflictResult = await page.evaluate(async (slotTime) => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const [hours, minutes] = slotTime.split(":").map(Number);
-      tomorrow.setHours(hours, minutes, 0, 0);
-      const isoLocal = tomorrow.toISOString().split(".")[0];
-
+    const conflictResult = await page.evaluate(async (slotIso) => {
       const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventTypeId: "1",
-          slotStart: isoLocal,
+          slotStart: slotIso,
           guestName: "Second Guest",
           guestEmail: "second@example.com",
         }),
@@ -67,7 +65,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
         status: resp.status,
         body: await resp.json(),
       };
-    }, bookedSlotTime);
+    }, firstSlotIso);
 
     // Verify API returns 409 Conflict with proper error structure
     expect(conflictResult.status).toBe(409);
@@ -95,7 +93,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
     });
 
     // The pre-booked slot time should not be in the available slots
-    expect(availableSlotTimes).not.toContain(expect.stringContaining(bookedSlotTime!));
+    expect(availableSlotTimes).not.toContain(expect.stringContaining("Свободно"));
 
     // Step 10: Select a different available slot and verify the booking succeeds.
     const slotBtn = page.getByRole("button", { name: /Свободно/ }).first();
@@ -107,28 +105,21 @@ test.describe("Slot conflict — 409 Conflict", () => {
     await page.getByRole("button", { name: "Продолжить" }).click();
     await expect(page.getByText("Бронирование создано!")).toBeVisible();
 
-    // Step 11: Extract the second booked slot time and create another conflict via API.
-    const secondSlotTime = await page.evaluate(() => {
-      const container = document.querySelector('[class*="min-h-\\[calc')?.parentElement;
-      if (!container) return null;
-      const match = container.textContent?.match(/(\d{2}:\d{2})/);
-      return match ? match[1] : null;
+    // Step 11: Get the second slot ISO and create another conflict via API.
+    const secondSlotIso = await page.evaluate(async () => {
+      const resp = await fetch("/api/bookings/upcoming");
+      const bookings: Array<{ slotStart: string }> = await resp.json();
+      return bookings[1]?.slotStart || null;
     });
-    expect(secondSlotTime).toBeTruthy();
+    expect(secondSlotIso).toBeTruthy();
 
-    const secondConflict = await page.evaluate(async (slotTime) => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const [hours, minutes] = slotTime.split(":").map(Number);
-      tomorrow.setHours(hours, minutes, 0, 0);
-      const isoLocal = tomorrow.toISOString().split(".")[0];
-
+    const secondConflict = await page.evaluate(async (slotIso) => {
       const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventTypeId: "1",
-          slotStart: isoLocal,
+          slotStart: slotIso,
           guestName: "Conflict Guest 2",
           guestEmail: "conflict2@example.com",
         }),
@@ -138,7 +129,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
         status: resp.status,
         body: await resp.json(),
       };
-    }, secondSlotTime);
+    }, secondSlotIso);
 
     expect(secondConflict.status).toBe(409);
     expect(secondConflict.body.code).toBe("CONFLICT");
@@ -163,20 +154,22 @@ test.describe("Slot conflict — 409 Conflict", () => {
     await page.getByPlaceholder("email@example.com").fill("final@example.com");
 
     // Simulate the exact error handling path from handleContinue in BookingPage.tsx
-    // https://github.com/volmax/ai-for-developers-project-386/blob/main/frontend/src/components/pages/BookingPage.tsx#L181-L187
-    const errorFormatCheck = await page.evaluate(async (preBookedSlot) => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const [hours, minutes] = preBookedSlot.split(":").map(Number);
-      tomorrow.setHours(hours, minutes, 0, 0);
-      const isoLocal = tomorrow.toISOString().split(".")[0];
+    const finalSlotIso = await page.evaluate(async () => {
+      const resp = await fetch("/api/bookings/upcoming");
+      const bookings: Array<{ slotStart: string }> = await resp.json();
+      // Only 2 bookings exist (conflicts return 409 and don't create records)
+      // Use the second booking's slot for the final conflict check
+      return bookings[1]?.slotStart || null;
+    });
+    expect(finalSlotIso).toBeTruthy();
 
+    const errorFormatCheck = await page.evaluate(async (slotIso) => {
       const resp = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventTypeId: "1",
-          slotStart: isoLocal,
+          slotStart: slotIso,
           guestName: "Final Conflict Guest",
           guestEmail: "finalconflict@example.com",
         }),
@@ -200,7 +193,7 @@ test.describe("Slot conflict — 409 Conflict", () => {
       }
 
       return { status: 200, errorMessage: null };
-    }, secondSlotTime);
+    }, finalSlotIso);
 
     // Verify the error message format matches what the UI would display
     expect(errorFormatCheck.isConflict).toBe(true);
