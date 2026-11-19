@@ -22,9 +22,45 @@ description = "Install all dependencies"
 run = [
   "cd backend && mvn dependency:go-offline -B",
   "cd frontend && npm install",
+  'cd frontend && if [ "$GITHUB_ACTIONS" = "true" ]; then npx playwright install --with-deps chromium; fi',
   "cd typespec && npm install",
   "pip install check-jsonschema",
 ]
+
+[tasks."test:e2e"]
+description = "Run Playwright E2E tests"
+run = '''
+set -e
+
+cleanup() {
+  kill $BACKEND_PID $FRONTEND_PID 2>/dev/null || true
+}
+trap cleanup EXIT
+
+echo "Starting backend..."
+(cd backend && mvn spring-boot:run -B) &
+BACKEND_PID=$!
+
+echo "Starting frontend..."
+(cd frontend && npm run dev) &
+FRONTEND_PID=$!
+
+echo "Waiting for backend (8080)..."
+timeout 120 bash -c 'until curl -s -o /dev/null http://localhost:8080; do sleep 2; done' || { echo "ERROR: Backend did not respond on localhost:8080"; exit 1; }
+echo "Backend is ready!"
+
+echo "Waiting for frontend (5173)..."
+timeout 60 bash -c 'until curl -s -o /dev/null http://localhost:5173; do sleep 1; done' || { echo "ERROR: Frontend did not respond on localhost:5173"; exit 1; }
+echo "Frontend is ready!"
+
+echo "Running Playwright tests..."
+cd frontend
+if [ "$GITHUB_ACTIONS" = "true" ]; then
+  npx playwright test
+else
+  PW_TEST_CONNECT_WS_ENDPOINT="ws://127.0.0.1:9222/" npx playwright test
+fi
+'''
 
 [tasks.build]
 description = "Build both projects"
@@ -60,6 +96,8 @@ run = [
   "osv-scanner scan source --config=./.osv-scanner.toml -L ./frontend/package-lock.json",
   "osv-scanner scan source --config=./.osv-scanner.toml --no-resolve -L ./backend/pom.xml",
   "mise run check:contract",
+  "mise run test",
+  "mise run test:e2e",
 ]
 
 [tasks."start:backend"]
