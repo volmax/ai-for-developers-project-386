@@ -30,8 +30,10 @@ public class EventTypeController {
     }
 
     @PostMapping
-    public ResponseEntity<EventType> create(@RequestBody EventTypeCreateRequest request) {
+    public ResponseEntity<EventTypeCreated> create(@RequestBody EventTypeCreateRequest request) {
         EventType eventType = eventTypeService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(eventType);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new EventTypeCreated(eventType));
     }
+
+    public record EventTypeCreated(EventType eventType) {}
 }

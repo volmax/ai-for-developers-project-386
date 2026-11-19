@@ -10,9 +10,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
+        String code = "validation-error";
         return ResponseEntity.status(ex.getStatusCode().value())
-                .body(new ErrorResponse(ex.getReason()));
+                .body(new ErrorResponse(code, ex.getReason()));
     }
 
-    public record ErrorResponse(String message) {}
+    public record ErrorResponse(String code, String message) {}
 }

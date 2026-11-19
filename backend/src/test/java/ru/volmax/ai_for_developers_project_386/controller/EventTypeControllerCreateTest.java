@@ -44,10 +44,10 @@ class EventTypeControllerCreateTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").value("Менторство"))
-                .andExpect(jsonPath("$.description").value("Персональное менторство"))
-                .andExpect(jsonPath("$.durationMinutes").value(60));
+                .andExpect(jsonPath("$.eventType.id").exists())
+                .andExpect(jsonPath("$.eventType.name").value("Менторство"))
+                .andExpect(jsonPath("$.eventType.description").value("Персональное менторство"))
+                .andExpect(jsonPath("$.eventType.durationMinutes").value(60));
     }
 
     @Test
@@ -208,11 +208,12 @@ class EventTypeControllerCreateTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.durationMinutes").value(540));
+                .andExpect(jsonPath("$.eventType.id").exists())
+                .andExpect(jsonPath("$.eventType.durationMinutes").value(540));
     }
 
     @Test
-    void duplicateDurationShouldReturn400WithHumanReadableMessage() throws Exception {
+    void duplicateDurationShouldReturn400WithCodeAndMessage() throws Exception {
         String json =
                 objectMapper.writeValueAsString(
                         Map.of(
@@ -225,12 +226,13 @@ class EventTypeControllerCreateTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("validation-error"))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.message").value("Тип события на 15 минут уже существует"));
     }
 
     @Test
-    void duplicateNameShouldReturn400WithHumanReadableMessage() throws Exception {
+    void duplicateNameShouldReturn400WithCodeAndMessage() throws Exception {
         String json =
                 objectMapper.writeValueAsString(
                         Map.of(
@@ -243,6 +245,7 @@ class EventTypeControllerCreateTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(json))
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("validation-error"))
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(
                         jsonPath("$.message")
