@@ -7,6 +7,7 @@ mise run install    # backend: mvn dependency:go-offline, frontend: npm install
 mise run build      # backend: mvn package -DskipTests, frontend: tsc -b && vite build
 mise run test       # backend: mvn test, frontend: vitest run
 mise run check      # полный lint/typecheck/format/security перед коммитом
+mise run verify     # полный пайплайн: check + unit-тесты + E2E с живым сервером
 mise run fix        # авто-исправление: spotless:apply + oxfmt
 ```
 
@@ -21,6 +22,7 @@ mise run fix        # авто-исправление: spotless:apply + oxfmt
 ## Неочевидные команды
 
 - `mise run check` запускает ~12 шагов: hadolint (оба Dockerfile), spotless:check, maven compile, oxlint, oxfmt, knip, jactionlint, typos, betterleaks, 4 проверки JSON-схем, 2 osv-scanner. **Это gate — должен проходить.**
+- `mise run verify` запускает полный пайплайн: check + backend unit-тесты + frontend unit-тесты + E2E-тесты с живым сервером (Docker). Используется в CI.
 
 ## НЕ трогать
 

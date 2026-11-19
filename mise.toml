@@ -16,6 +16,7 @@ osv-scanner = "2.7.0"
 [env]
 _.file = ".env"
 SPRING_PROFILES_ACTIVE = "dev"
+JAVA_HOME = "/usr/java/default"
 
 [tasks.install]
 description = "Install all dependencies"
@@ -100,6 +101,27 @@ description = "Generate OpenAPI and TypeScript client, verify no diff"
 depends = ["install:contract"]
 dir = "typespec"
 run = "npm run check"
+
+[tasks."test:e2e"]
+description = "Run E2E tests with real server via Docker"
+run = [
+  "docker build -f Dockerfile.e2e -t booking-e2e .",
+  "docker rm -f booking-e2e 2>/dev/null || true",
+  "docker run -d --name booking-e2e -p 8080:80 booking-e2e",
+  "sleep 15",
+  "docker exec -T booking-e2e npx playwright test --reporter=list",
+  "docker rm -f booking-e2e",
+]
+
+[tasks.verify]
+description = "Run all checks: lint, types, unit tests, E2E tests"
+run = [
+  "mise run install",
+  "mise run check",
+  "cd backend && mvn test -B",
+  "cd frontend && npm run test:run",
+  "mise run test:e2e",
+]
 
 [daemons.backend]
 run = "cd backend && mvn spring-boot:run -B"
