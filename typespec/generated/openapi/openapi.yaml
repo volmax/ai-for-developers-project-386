@@ -142,6 +142,31 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - EventTypes
+    post:
+      operationId: EventTypes_create
+      description: Создать новый тип события (201/400)
+      parameters: []
+      responses:
+        '201':
+          description: Ответ 201 — тип события создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTypeCreated'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - EventTypes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTypeCreate'
 components:
   schemas:
     Booking:
@@ -262,12 +287,38 @@ components:
           type: string
           description: Описание типа события
         durationMinutes:
-          type: number
-          enum:
-            - 15
-            - 30
-          description: Длительность в минутах (15 или 30)
-      description: Тип события (захардкожен)
+          type: integer
+          format: int32
+          description: Длительность в минутах
+      description: Тип события
+    EventTypeCreate:
+      type: object
+      required:
+        - name
+        - description
+        - durationMinutes
+      properties:
+        name:
+          type: string
+          description: Название типа события (обязательное)
+        description:
+          type: string
+          description: Описание типа события (обязательное)
+        durationMinutes:
+          type: integer
+          format: int32
+          description: Длительность в минутах
+      description: Запрос на создание типа события
+    EventTypeCreated:
+      type: object
+      required:
+        - eventType
+      properties:
+        eventType:
+          allOf:
+            - $ref: '#/components/schemas/EventType'
+          description: Созданный тип события
+      description: Ответ 201 — тип события создан
     FreeSlotsCountResult:
       type: object
       required:

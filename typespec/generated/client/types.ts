@@ -66,7 +66,8 @@ export interface paths {
         /** @description Получить список типов событий */
         get: operations["EventTypes_list"];
         put?: never;
-        post?: never;
+        /** @description Создать новый тип события (201/400) */
+        post: operations["EventTypes_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -144,7 +145,7 @@ export interface components {
             /** @description Описание ошибки */
             message: string;
         };
-        /** @description Тип события (захардкожен) */
+        /** @description Тип события */
         EventType: {
             /**
              * Format: int64
@@ -156,10 +157,27 @@ export interface components {
             /** @description Описание типа события */
             description: string;
             /**
-             * @description Длительность в минутах (15 или 30)
-             * @enum {number}
+             * Format: int32
+             * @description Длительность в минутах
              */
-            durationMinutes: 15 | 30;
+            durationMinutes: number;
+        };
+        /** @description Запрос на создание типа события */
+        EventTypeCreate: {
+            /** @description Название типа события (обязательное) */
+            name: string;
+            /** @description Описание типа события (обязательное) */
+            description: string;
+            /**
+             * Format: int32
+             * @description Длительность в минутах
+             */
+            durationMinutes: number;
+        };
+        /** @description Ответ 201 — тип события создан */
+        EventTypeCreated: {
+            /** @description Созданный тип события */
+            eventType: components["schemas"]["EventType"];
         };
         /** @description Ответ с количеством свободных слотов */
         FreeSlotsCountResult: {
@@ -320,6 +338,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EventType"][];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    EventTypes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventTypeCreate"];
+            };
+        };
+        responses: {
+            /** @description Ответ 201 — тип события создан */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventTypeCreated"];
                 };
             };
             /** @description An unexpected error response. */

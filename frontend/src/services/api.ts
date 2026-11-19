@@ -66,4 +66,13 @@ export async function getFreeSlotsCount(eventTypeId: string, date: string): Prom
   return response.count;
 }
 
+export async function createEventType(request: {
+  name: string;
+  description: string;
+  durationMinutes: number;
+}): Promise<EventType> {
+  const response = await api.post<{ eventType: EventType }>("/event-types", request);
+  return response.eventType;
+}
+
 export type { Booking, EventType, BookingRequest };
