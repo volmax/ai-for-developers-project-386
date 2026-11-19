@@ -30,7 +30,7 @@ export function CreateEventTypePage() {
     setError(null);
 
     try {
-      await createEventType({ name, description, durationMinutes });
+      await createEventType({ body: { name, description, durationMinutes } });
       navigate("/events");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ошибка при создании типа встречи");

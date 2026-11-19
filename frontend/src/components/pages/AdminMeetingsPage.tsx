@@ -38,7 +38,7 @@ export function AdminMeetingsPage() {
 
     async function fetchBookings() {
       try {
-        const data = await getUpcomingBookings();
+        const { data } = await getUpcomingBookings({});
         if (!cancelled) {
           setBookings(data);
           setIsLoading(false);

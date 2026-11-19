@@ -46,7 +46,7 @@ describe("AdminMeetingsPage", () => {
   });
 
   it("отображает заголовок 'Предстоящие встречи'", async () => {
-    mockGetUpcomingBookings.mockResolvedValue([]);
+    mockGetUpcomingBookings.mockResolvedValue({ data: [] });
 
     renderPage();
 
@@ -56,26 +56,28 @@ describe("AdminMeetingsPage", () => {
   });
 
   it("отображает список встреч при наличии бронирований", async () => {
-    mockGetUpcomingBookings.mockResolvedValue([
-      createMockBooking({
-        id: 1,
-        guestName: "Иван Петров",
-        guestEmail: "ivan@example.com",
-        eventTypeName: "Встреча 15 минут",
-        eventDurationMinutes: 15,
-        slotStart: "2026-11-16T10:00:00",
-        slotEnd: "2026-11-16T10:15:00",
-      }),
-      createMockBooking({
-        id: 2,
-        guestName: "Мария Сидорова",
-        guestEmail: undefined,
-        eventTypeName: "Встреча 30 минут",
-        eventDurationMinutes: 30,
-        slotStart: "2026-11-17T14:00:00",
-        slotEnd: "2026-11-17T14:30:00",
-      }),
-    ]);
+    mockGetUpcomingBookings.mockResolvedValue({
+      data: [
+        createMockBooking({
+          id: 1,
+          guestName: "Иван Петров",
+          guestEmail: "ivan@example.com",
+          eventTypeName: "Встреча 15 минут",
+          eventDurationMinutes: 15,
+          slotStart: "2026-11-16T10:00:00",
+          slotEnd: "2026-11-16T10:15:00",
+        }),
+        createMockBooking({
+          id: 2,
+          guestName: "Мария Сидорова",
+          guestEmail: undefined,
+          eventTypeName: "Встреча 30 минут",
+          eventDurationMinutes: 30,
+          slotStart: "2026-11-17T14:00:00",
+          slotEnd: "2026-11-17T14:30:00",
+        }),
+      ],
+    });
 
     renderPage();
 
@@ -102,11 +104,13 @@ describe("AdminMeetingsPage", () => {
   });
 
   it("не отображает email, если он не указан", async () => {
-    mockGetUpcomingBookings.mockResolvedValue([
-      createMockBooking({
-        guestEmail: undefined,
-      }),
-    ]);
+    mockGetUpcomingBookings.mockResolvedValue({
+      data: [
+        createMockBooking({
+          guestEmail: undefined,
+        }),
+      ],
+    });
 
     renderPage();
 
@@ -129,7 +133,7 @@ describe("AdminMeetingsPage", () => {
   });
 
   it("отображает 'Нет предстоящих встреч', если список пуст", async () => {
-    mockGetUpcomingBookings.mockResolvedValue([]);
+    mockGetUpcomingBookings.mockResolvedValue({ data: [] });
 
     renderPage();
 

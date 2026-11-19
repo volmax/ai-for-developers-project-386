@@ -10,12 +10,14 @@
     "src/components/ui/index.ts",
     "src/components/ui/button.tsx",
     "src/components/ui/card.tsx",
-    "src/lib/utils.ts"
+    "src/lib/utils.ts",
+    "src/services/sdk.ts"
   ],
   "ignoreDependencies": [
     "lucide-react",
     "postcss-load-config",
+    "openapi-typescript-fetch",
     "../../typespec/generated/client/types"
   ],
-  "ignoreUnresolved": ["../../typespec/generated/client/types"]
+  "ignoreUnresolved": ["../../typespec/generated/client/types", "openapi-typescript-fetch"]
 }

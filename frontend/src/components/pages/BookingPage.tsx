@@ -79,7 +79,7 @@ export function BookingPage() {
     let cancelled = false;
     async function fetch() {
       try {
-        const data = await getEventTypes();
+        const { data } = await getEventTypes({});
         if (!cancelled) {
           const found = data.find((e) => String(e.id) === eventTypeId);
           setEventType(found || null);
@@ -115,8 +115,10 @@ export function BookingPage() {
         if (dayDate >= tomorrow && dayDate <= windowEnd) {
           const dateStr = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, "0")}-${String(dayDate.getDate()).padStart(2, "0")}`;
           try {
-            const count = await getFreeSlotsCount(String(eventType.id), dateStr);
-            results[dateStr] = count;
+            const { data } = await getFreeSlotsCount({
+              query: { eventTypeId: String(eventType.id), date: dateStr },
+            });
+            results[dateStr] = data.count;
           } catch {
             results[dateStr] = 0;
           }
@@ -143,7 +145,9 @@ export function BookingPage() {
     let cancelled = false;
     async function fetch() {
       try {
-        const slots = await getAvailableSlots(String(eventType!.id), dateStr);
+        const { data: slots } = await getAvailableSlots({
+          query: { eventTypeId: String(eventType!.id), date: dateStr },
+        });
         if (!cancelled) {
           setAvailableSlots(slots);
           setSelectedSlot(null);
@@ -176,8 +180,8 @@ export function BookingPage() {
         guestEmail: guestEmail.trim() || undefined,
       };
 
-      const booking = await createBooking(request);
-      setBookingResult(booking);
+      const { data } = await createBooking({ body: request });
+      setBookingResult(data.booking);
 
       // Clear form state
       setSelectedSlot(null);
@@ -187,7 +191,9 @@ export function BookingPage() {
       // Refetch slots — the booked slot will disappear from the list
       if (eventType && selectedDate) {
         const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
-        const slots = await getAvailableSlots(String(eventType.id), dateStr);
+        const { data: slots } = await getAvailableSlots({
+          query: { eventTypeId: String(eventType.id), date: dateStr },
+        });
         setAvailableSlots(slots);
       }
     } catch (err: unknown) {

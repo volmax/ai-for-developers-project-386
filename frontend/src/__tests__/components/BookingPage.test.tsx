@@ -10,12 +10,13 @@ const mockGetAvailableSlots = vi.fn();
 const mockGetFreeSlotsCount = vi.fn();
 const mockCreateBooking = vi.fn();
 
-vi.mock("@/services/api", () => ({
+vi.mock("@/services/sdk", () => ({
   getEventTypes: (...args: unknown[]) => mockGetEventTypes(...args),
   getAvailableSlots: (...args: unknown[]) => mockGetAvailableSlots(...args),
   getFreeSlotsCount: (...args: unknown[]) => mockGetFreeSlotsCount(...args),
   createBooking: (...args: unknown[]) => mockCreateBooking(...args),
-  getUpcomingBookings: () => Promise.resolve([]),
+  getUpcomingBookings: () => Promise.resolve({ data: [] }),
+  createEventType: () => Promise.resolve({ data: {} }),
 }));
 
 // Freeze "today" to a fixed date so tests are deterministic.
@@ -78,25 +79,26 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockGetEventTypes.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Встреча 15 минут",
+          description: "Короткий тип события",
+          durationMinutes: 15,
+        },
+      ],
+    });
 
-    mockGetAvailableSlots.mockResolvedValue([
-      `${TOMORROW_DATE_STR}T09:00:00`,
-      `${TOMORROW_DATE_STR}T09:15:00`,
-    ]);
+    mockGetAvailableSlots.mockResolvedValue({
+      data: [`${TOMORROW_DATE_STR}T09:00:00`, `${TOMORROW_DATE_STR}T09:15:00`],
+    });
 
-    mockGetFreeSlotsCount.mockResolvedValue(2);
+    mockGetFreeSlotsCount.mockResolvedValue({ data: { count: 2 } });
   });
 
   it("отображает кнопку 'Забронировать ещё' после успешного бронирования", async () => {
-    mockCreateBooking.mockResolvedValue(createMockBooking());
+    mockCreateBooking.mockResolvedValue({ data: { booking: createMockBooking() } });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -112,7 +114,11 @@ describe("BookingPage — кнопка 'Забронировать ещё'", () 
   });
 
   it("переходит на /events при нажатии кнопки 'Забронировать ещё'", async () => {
-    mockCreateBooking.mockResolvedValue(createMockBooking({ guestEmail: undefined }));
+    mockCreateBooking.mockResolvedValue({
+      data: {
+        booking: createMockBooking({ guestEmail: undefined }),
+      },
+    });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -135,17 +141,21 @@ describe("BookingPage — базовый рендеринг", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockGetEventTypes.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Встреча 15 минут",
+          description: "Короткий тип события",
+          durationMinutes: 15,
+        },
+      ],
+    });
 
-    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
-    mockGetFreeSlotsCount.mockResolvedValue(1);
+    mockGetAvailableSlots.mockResolvedValue({
+      data: [`${TOMORROW_DATE_STR}T09:00:00`],
+    });
+    mockGetFreeSlotsCount.mockResolvedValue({ data: { count: 1 } });
   });
 
   it("отображает 'Загрузка...' при загрузке", () => {
@@ -196,21 +206,25 @@ describe("BookingPage — выбор даты и слота", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockGetEventTypes.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Встреча 15 минут",
+          description: "Короткий тип события",
+          durationMinutes: 15,
+        },
+      ],
+    });
 
-    mockGetAvailableSlots.mockResolvedValue([
-      `${TOMORROW_DATE_STR}T09:00:00`,
-      `${TOMORROW_DATE_STR}T09:15:00`,
-      `${TOMORROW_DATE_STR}T10:00:00`,
-    ]);
-    mockGetFreeSlotsCount.mockResolvedValue(3);
+    mockGetAvailableSlots.mockResolvedValue({
+      data: [
+        `${TOMORROW_DATE_STR}T09:00:00`,
+        `${TOMORROW_DATE_STR}T09:15:00`,
+        `${TOMORROW_DATE_STR}T10:00:00`,
+      ],
+    });
+    mockGetFreeSlotsCount.mockResolvedValue({ data: { count: 3 } });
   });
 
   it("отображает слоты при выборе даты", async () => {
@@ -235,7 +249,7 @@ describe("BookingPage — выбор даты и слота", () => {
   });
 
   it("отображает 'Нет свободных слотов', когда слотов нет", async () => {
-    mockGetAvailableSlots.mockResolvedValue([]);
+    mockGetAvailableSlots.mockResolvedValue({ data: [] });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -315,17 +329,21 @@ describe("BookingPage — форма бронирования", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockGetEventTypes.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Встреча 15 минут",
+          description: "Короткий тип события",
+          durationMinutes: 15,
+        },
+      ],
+    });
 
-    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
-    mockGetFreeSlotsCount.mockResolvedValue(1);
+    mockGetAvailableSlots.mockResolvedValue({
+      data: [`${TOMORROW_DATE_STR}T09:00:00`],
+    });
+    mockGetFreeSlotsCount.mockResolvedValue({ data: { count: 1 } });
   });
 
   it("отображает форму бронирования после выбора слота", async () => {
@@ -401,21 +419,25 @@ describe("BookingPage — создание бронирования", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockGetEventTypes.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          name: "Встреча 15 минут",
+          description: "Короткий тип события",
+          durationMinutes: 15,
+        },
+      ],
+    });
 
-    mockGetAvailableSlots.mockResolvedValue([`${TOMORROW_DATE_STR}T09:00:00`]);
-    mockGetFreeSlotsCount.mockResolvedValue(1);
+    mockGetAvailableSlots.mockResolvedValue({
+      data: [`${TOMORROW_DATE_STR}T09:00:00`],
+    });
+    mockGetFreeSlotsCount.mockResolvedValue({ data: { count: 1 } });
   });
 
   it("создаёт бронирование при нажатии 'Продолжить'", async () => {
-    mockCreateBooking.mockResolvedValue(createMockBooking());
+    mockCreateBooking.mockResolvedValue({ data: { booking: createMockBooking() } });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -439,16 +461,20 @@ describe("BookingPage — создание бронирования", () => {
       guestName: "Тест Гость",
       guestEmail: "test@example.com",
     };
-    expect(mockCreateBooking).toHaveBeenCalledWith(expectedCall);
+    expect(mockCreateBooking).toHaveBeenCalledWith({
+      body: expectedCall,
+    });
   });
 
   it("отображает подтверждение после успешного бронирования", async () => {
-    mockCreateBooking.mockResolvedValue(
-      createMockBooking({
-        guestName: "Тест Гость",
-        guestEmail: "test@example.com",
-      }),
-    );
+    mockCreateBooking.mockResolvedValue({
+      data: {
+        booking: createMockBooking({
+          guestName: "Тест Гость",
+          guestEmail: "test@example.com",
+        }),
+      },
+    });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -582,12 +608,14 @@ describe("BookingPage — создание бронирования", () => {
   });
 
   it("отображает бронирование без email, если email пустой", async () => {
-    mockCreateBooking.mockResolvedValue(
-      createMockBooking({
-        guestName: "Тест Гость",
-        guestEmail: undefined,
-      }),
-    );
+    mockCreateBooking.mockResolvedValue({
+      data: {
+        booking: createMockBooking({
+          guestName: "Тест Гость",
+          guestEmail: undefined,
+        }),
+      },
+    });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");
@@ -609,17 +637,19 @@ describe("BookingPage — создание бронирования", () => {
   });
 
   it("очищает выбранный слот и рефетчит список после успешного бронирования", async () => {
-    mockCreateBooking.mockResolvedValue(
-      createMockBooking({
-        guestName: "Тест Гость",
-        guestEmail: "test@example.com",
-      }),
-    );
+    mockCreateBooking.mockResolvedValue({
+      data: {
+        booking: createMockBooking({
+          guestName: "Тест Гость",
+          guestEmail: "test@example.com",
+        }),
+      },
+    });
 
     // First call returns the slot (for initial load), second call returns empty (after booking)
     mockGetAvailableSlots
-      .mockResolvedValueOnce([`${TOMORROW_DATE_STR}T09:00:00`])
-      .mockResolvedValueOnce([]);
+      .mockResolvedValueOnce({ data: [`${TOMORROW_DATE_STR}T09:00:00`] })
+      .mockResolvedValueOnce({ data: [] });
 
     const user = userEvent.setup();
     renderWithRouter("/booking/1");

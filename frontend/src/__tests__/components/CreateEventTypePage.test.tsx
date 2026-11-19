@@ -80,9 +80,11 @@ describe("CreateEventTypePage", () => {
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/events"));
     expect(mockCreateEventType).toHaveBeenCalledWith({
-      name: "Менторство",
-      description: "Персональное менторство",
-      durationMinutes: 60,
+      body: {
+        name: "Менторство",
+        description: "Персональное менторство",
+        durationMinutes: 60,
+      },
     });
   });
 

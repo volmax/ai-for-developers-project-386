@@ -11,10 +11,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Получить предстоящие встречи */
-        get: operations["Bookings_upcoming"];
+        get?: never;
         put?: never;
-        /** @description Создать бронирование (201/409) */
+        /** @description Создать бронирование (201/400/409) */
         post: operations["Bookings_create"];
         delete?: never;
         options?: never;
@@ -48,6 +47,23 @@ export interface paths {
         };
         /** @description Получить количество свободных слотов */
         get: operations["Bookings_freeSlotsCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookings/upcoming": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Получить предстоящие встречи */
+        get: operations["Bookings_upcoming"];
         put?: never;
         post?: never;
         delete?: never;
@@ -196,35 +212,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    Bookings_upcoming: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The request has succeeded. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Booking"][];
-                };
-            };
-            /** @description An unexpected error response. */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     Bookings_create: {
         parameters: {
             query?: never;
@@ -254,6 +241,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BookingConflict"];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -309,6 +305,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FreeSlotsCountResult"];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Bookings_upcoming: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"][];
                 };
             };
             /** @description An unexpected error response. */
