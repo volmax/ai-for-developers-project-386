@@ -108,7 +108,7 @@ run = [
   "docker build -f Dockerfile.e2e -t booking-e2e .",
   "docker rm -f booking-e2e 2>/dev/null || true",
   "docker run -d --name booking-e2e -p 8080:80 booking-e2e",
-  "sleep 15",
+  "sleep 25",
   "docker exec -T booking-e2e npx playwright test --reporter=list",
   "docker rm -f booking-e2e",
 ]
@@ -120,6 +120,7 @@ run = [
   "mise run check",
   "cd backend && mvn test -B",
   "cd frontend && npm run test:run",
+  "cd frontend && npx tsc --noEmit",
   "mise run test:e2e",
 ]
 
