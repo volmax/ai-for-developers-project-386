@@ -17,7 +17,7 @@ export function Header() {
             Записаться
           </Link>
           <Link
-            to="/admin/meetings"
+            to="/admin"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Админка

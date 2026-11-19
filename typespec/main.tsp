@@ -9,7 +9,32 @@ using Http;
 namespace Calendar;
 
 /**
- * Тип события (захардкожен)
+ * Запрос на создание типа события
+ */
+model EventTypeCreate {
+  /** Название типа события (обязательное) */
+  name: string;
+
+  /** Описание типа события (обязательное) */
+  description: string;
+
+  /** Длительность в минутах */
+  durationMinutes: int32;
+}
+
+/**
+ * Ответ 201 — тип события создан
+ */
+model EventTypeCreated {
+  /** Уникальный идентификатор */
+  @statusCode status: 201;
+
+  /** Созданный тип события */
+  eventType: EventType;
+}
+
+/**
+ * Тип события
  */
 model EventType {
   /** Уникальный идентификатор */
@@ -21,8 +46,8 @@ model EventType {
   /** Описание типа события */
   description: string;
 
-  /** Длительность в минутах (15 или 30) */
-  durationMinutes: 15 | 30;
+  /** Длительность в минутах */
+  durationMinutes: int32;
 }
 
 /**
@@ -123,6 +148,9 @@ model FreeSlotsCountResult {
 interface EventTypes {
   /** Получить список типов событий */
   @get list(): EventType[] | ErrorResponse;
+
+  /** Создать новый тип события (201/400) */
+  @post create(@body body: EventTypeCreate): EventTypeCreated | ErrorResponse;
 }
 
 /**
