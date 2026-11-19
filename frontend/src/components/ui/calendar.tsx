@@ -65,6 +65,11 @@ export function Calendar({
     return date < tomorrow || date > windowEnd;
   };
 
+  const isWeekend = (date: Date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Sunday or Saturday
+  };
+
   const formatDateKey = (date: Date) => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   };
@@ -104,6 +109,7 @@ export function Calendar({
           }
 
           const outOfWindow = isOutOfWindow(item.date);
+          const weekend = isWeekend(item.date);
           const isSelected =
             selectedDate !== null &&
             item.date.getFullYear() === selectedDate.getFullYear() &&
@@ -116,21 +122,21 @@ export function Calendar({
           return (
             <button
               key={index}
-              disabled={outOfWindow}
+              disabled={outOfWindow || weekend}
               onClick={() => onSelectDate(item.date!)}
               className={`
                 relative min-h-[60px] rounded-lg p-2 text-left transition-colors
                 ${
                   isSelected
                     ? "bg-accent text-accent-foreground"
-                    : outOfWindow
+                    : outOfWindow || weekend
                       ? "cursor-not-allowed text-muted-foreground/50"
                       : "hover:bg-accent/50"
                 }
               `}
             >
               <span className="text-sm font-medium">{item.day}</span>
-              {!outOfWindow && (
+              {!outOfWindow && !weekend && (
                 <div className="mt-1 text-xs text-muted-foreground">{freeSlots} св.</div>
               )}
             </button>

@@ -52,7 +52,7 @@ class BookingServiceTest {
     @Test
     void createValidBookingShouldReturnCreatedBooking() {
         LocalDateTime slotStart =
-                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(1).atTime(10, 0);
+                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(3).atTime(10, 0);
         BookingRequest request = new BookingRequest();
         request.setEventTypeId("1");
         request.setSlotStart(slotStart);
@@ -84,6 +84,7 @@ class BookingServiceTest {
         // Yesterday is outside the booking window (tomorrow + 14 days)
         LocalDateTime slotStart =
                 LocalDate.now(ZoneId.of("Europe/Moscow")).minusDays(1).atTime(10, 0);
+
         BookingRequest request = new BookingRequest();
         request.setEventTypeId("1");
         request.setSlotStart(slotStart);
@@ -123,7 +124,7 @@ class BookingServiceTest {
     @Test
     void createBookingWithNonExistentEventTypeShouldThrow() {
         LocalDateTime slotStart =
-                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(1).atTime(10, 0);
+                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(3).atTime(10, 0);
         BookingRequest request = new BookingRequest();
         request.setEventTypeId("999");
         request.setSlotStart(slotStart);
@@ -136,7 +137,7 @@ class BookingServiceTest {
     @Test
     void createBookingWithDuplicateSlotShouldThrow() {
         LocalDateTime slotStart =
-                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(1).atTime(10, 0);
+                LocalDate.now(ZoneId.of("Europe/Moscow")).plusDays(3).atTime(10, 0);
 
         // First booking should succeed
         BookingRequest firstRequest = new BookingRequest();
