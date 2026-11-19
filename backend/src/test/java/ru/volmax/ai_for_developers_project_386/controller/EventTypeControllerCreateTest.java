@@ -210,4 +210,42 @@ class EventTypeControllerCreateTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.durationMinutes").value(540));
     }
+
+    @Test
+    void duplicateDurationShouldReturn400WithHumanReadableMessage() throws Exception {
+        String json =
+                objectMapper.writeValueAsString(
+                        Map.of(
+                                "name", "Новый тип",
+                                "description", "Описание",
+                                "durationMinutes", 15));
+
+        mockMvc.perform(
+                        post("/api/event-types")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.message").value("Тип события на 15 минут уже существует"));
+    }
+
+    @Test
+    void duplicateNameShouldReturn400WithHumanReadableMessage() throws Exception {
+        String json =
+                objectMapper.writeValueAsString(
+                        Map.of(
+                                "name", "Консультация",
+                                "description", "Новое описание",
+                                "durationMinutes", 45));
+
+        mockMvc.perform(
+                        post("/api/event-types")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("Тип события с названием \"Консультация\" уже существует"));
+    }
 }
