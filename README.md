@@ -8,6 +8,31 @@
 Учебный проект Хекслета: https://ru.hexlet.io/programs/ai-for-developers
 Как это должно работать: https://files.hexlet.app/a/2ipc5m
 
+## Публикация
+
+**Публичная ссылка:** https://ai-for-developers-project-386-q5xr.onrender.com
+
+## MCP-конфигурация
+
+**MCP хостинг:** https://mcp.render.com/mcp
+
+**Конфигурация подключения:**
+
+```json
+{
+  "render": {
+    "type": "remote",
+    "url": "https://mcp.render.com/mcp",
+    "oauth": false,
+    "headers": {
+      "Authorization": "Bearer {env:RENDER_MCP_API_KEY}"
+    }
+  }
+}
+```
+
+**Переменная окружения:** `RENDER_MCP_API_KEY` — токен для доступа к MCP.
+
 ## Стек
 
 - Разное
