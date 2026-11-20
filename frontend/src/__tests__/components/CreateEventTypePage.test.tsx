@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+declare global {
+  // eslint-disable-next-line no-var
+  var mockFetch: ReturnType<typeof vi.fn>;
+}
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { CreateEventTypePage } from "@/components/pages/CreateEventTypePage";
 
-const mockCreateEventType = vi.fn();
+const mockFetch = globalThis.mockFetch as ReturnType<typeof vi.fn>;
 const mockNavigate = vi.fn();
-
-vi.mock("@/services/api", () => ({
-  createEventType: (...args: unknown[]) => mockCreateEventType(...args),
-}));
 
 vi.mock("react-router-dom", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-router-dom")>();
@@ -54,19 +55,23 @@ describe("CreateEventTypePage", () => {
     expect(options).toContain(60);
     expect(options).toContain(540);
 
-    // Verify step is 15
     for (let i = 1; i < options.length; i++) {
       expect(options[i] - options[i - 1]).toBe(15);
     }
   });
 
   it("отправляет форму и перенаправляет на /events при успехе", async () => {
-    mockCreateEventType.mockResolvedValue({
-      id: 1,
-      name: "Менторство",
-      description: "Описание",
-      durationMinutes: 60,
-    });
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          id: 1,
+          name: "Менторство",
+          description: "Описание",
+          durationMinutes: 60,
+        }),
+        { status: 201 },
+      ),
+    );
 
     renderPage();
 
@@ -79,17 +84,21 @@ describe("CreateEventTypePage", () => {
     fireEvent.click(screen.getByRole("button", { name: /создать тип встречи/i }));
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/events"));
-    expect(mockCreateEventType).toHaveBeenCalledWith({
-      body: {
-        name: "Менторство",
-        description: "Персональное менторство",
-        durationMinutes: 60,
-      },
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/event-types",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          name: "Менторство",
+          description: "Персональное менторство",
+          durationMinutes: 60,
+        }),
+      }),
+    );
   });
 
   it("отображает ошибку при неудачном создании", async () => {
-    mockCreateEventType.mockRejectedValue(new Error("Тип события уже существует"));
+    mockFetch.mockRejectedValueOnce(new Error("Тип события уже существует"));
 
     renderPage();
 
@@ -101,7 +110,7 @@ describe("CreateEventTypePage", () => {
   });
 
   it("деактивирует кнопку на время отправки", async () => {
-    mockCreateEventType.mockReturnValue(new Promise(() => {})); // never resolves
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
     renderPage();
 
