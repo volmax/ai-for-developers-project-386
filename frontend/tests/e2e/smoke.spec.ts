@@ -19,6 +19,9 @@ test.describe("Smoke Test — полный путь бронирования", (
     await page.getByRole("link", { name: "Записаться" }).first().click();
     await expect(page).toHaveURL("/events");
 
+    // Wait for events page to load (data is fetched asynchronously)
+    await page.waitForSelector("text=Загрузка...", { state: "hidden" });
+
     // Verify events page
     await expect(page.getByRole("heading", { name: "Выберите тип события" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Консультация" })).toBeVisible();

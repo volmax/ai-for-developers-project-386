@@ -1,157 +1,141 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-  api,
-  getUpcomingBookings,
-  getAvailableSlots,
-  getFreeSlotsCount,
-  createBooking,
-} from "@/services/api";
 
+// Create a mock fetch function
 const mockFetch = vi.fn();
-globalThis.fetch = mockFetch;
-
-describe("ApiClient", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
-
-  it("returns parsed JSON on success", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: async () => ({ status: "ok" }),
-    });
-
-    const result = await api.get("/health");
-    expect(result).toEqual({ status: "ok" });
-    expect(mockFetch).toHaveBeenCalledWith("/api/health", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-  });
-
-  it("throws on non-ok response", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 500,
-      statusText: "Internal Server Error",
-      text: async () => "",
-    });
-
-    await expect(api.get("/health")).rejects.toThrow("API error 500: Internal Server Error");
-  });
-
-  it("throws with error message from response body", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 409,
-      statusText: "Conflict",
-      text: async () => '{"code":"CONFLICT","message":"Слот занят"}',
-    });
-
-    await expect(api.get("/health")).rejects.toThrow("Слот занят");
-  });
-
-  it("sends JSON body on POST", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: async () => ({ created: true }),
-    });
-
-    const result = await api.post("/items", { name: "test" });
-    expect(result).toEqual({ created: true });
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/items",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ name: "test" }),
-      }),
-    );
-  });
+Object.defineProperty(globalThis, "fetch", {
+  value: mockFetch,
+  writable: true,
+  configurable: true,
 });
 
-describe("Booking API helpers", () => {
+beforeEach(() => {
+  mockFetch.mockReset();
+});
+
+// Import SDK functions (they use fetch directly)
+import {
+  getUpcomingBookings,
+  createBooking,
+  getAvailableSlots,
+  getFreeSlotsCount,
+  getEventTypes,
+  createEventType,
+  ApiError,
+} from "@/services/sdk";
+
+describe("SDK function signatures", () => {
   beforeEach(() => {
-    mockFetch.mockReset();
+    vi.clearAllMocks();
+    mockFetch.mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
   });
 
   it("getUpcomingBookings calls correct endpoint", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: async () => [{ id: 1, eventTypeName: "Консультация" }],
-    });
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify([{ id: 1 }]), { status: 200 }));
 
-    const result = await getUpcomingBookings();
-    expect(result).toEqual([{ id: 1, eventTypeName: "Консультация" }]);
-    expect(mockFetch).toHaveBeenCalledWith("/api/bookings/upcoming", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const { status, data } = await getUpcomingBookings();
+    expect(status).toBe(200);
+    expect(data).toEqual([{ id: 1 }]);
+    expect(mockFetch).toHaveBeenCalledWith("/api/bookings/upcoming", {});
   });
 
-  it("getAvailableSlots calls correct endpoint with params", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: async () => ["2026-11-16T09:00", "2026-11-16T09:15"],
-    });
-
-    const result = await getAvailableSlots("1", "2026-11-16");
-    expect(result).toEqual(["2026-11-16T09:00", "2026-11-16T09:15"]);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/bookings/available-slots?eventTypeId=1&date=2026-11-16",
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-  });
-
-  it("getFreeSlotsCount calls correct endpoint", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      statusText: "OK",
-      json: async () => ({ count: 12 }),
-    });
-
-    const result = await getFreeSlotsCount("1", "2026-11-16");
-    expect(result).toBe(12);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "/api/bookings/free-slots-count?eventTypeId=1&date=2026-11-16",
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-  });
-
-  it("createBooking calls correct endpoint with request body", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 201,
-      statusText: "Created",
-      json: async () => ({ booking: { id: 1, eventTypeId: "1", guestName: "Test" } }),
-    });
-
-    const request = {
+  it("createBooking calls correct endpoint with body", async () => {
+    const body = {
       eventTypeId: "1",
       slotStart: "2026-11-16T10:00:00",
-      guestName: "Test Guest",
+      guestName: "Test",
       guestEmail: "test@example.com",
     };
-    const result = await createBooking(request);
-    expect(result).toEqual({ id: 1, eventTypeId: "1", guestName: "Test" });
-    expect(mockFetch).toHaveBeenCalledWith("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ id: 1 }), { status: 201 }));
+
+    const { status, data } = await createBooking({ body });
+    expect(status).toBe(201);
+    expect(data).toEqual({ id: 1 });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/bookings",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }),
+    );
+  });
+
+  it("createBooking throws ApiError on non-ok response", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: "Conflict" }), {
+        status: 409,
+      }),
+    );
+
+    await expect(
+      createBooking({
+        body: {
+          eventTypeId: "1",
+          slotStart: "2026-11-16T10:00:00",
+          guestName: "Test",
+        },
+      }),
+    ).rejects.toThrow(ApiError);
+  });
+
+  it("getAvailableSlots calls correct endpoint with query params", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify(["09:00", "09:15"]), { status: 200 }),
+    );
+
+    const { status, data } = await getAvailableSlots({
+      query: { eventTypeId: "1", date: "2026-11-16" },
     });
+    expect(status).toBe(200);
+    expect(data).toEqual(["09:00", "09:15"]);
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/bookings/available-slots?eventTypeId=1&date=2026-11-16",
+      {},
+    );
+  });
+
+  it("getFreeSlotsCount calls correct endpoint with query params", async () => {
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify({ count: 12 }), { status: 200 }));
+
+    const { status, data } = await getFreeSlotsCount({
+      query: { eventTypeId: "1", date: "2026-11-16" },
+    });
+    expect(status).toBe(200);
+    expect(data).toEqual({ count: 12 });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/bookings/free-slots-count?eventTypeId=1&date=2026-11-16",
+      {},
+    );
+  });
+
+  it("getEventTypes calls correct endpoint", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify([{ id: 1, name: "15 мин", durationMinutes: 15 }]), {
+        status: 200,
+      }),
+    );
+
+    const { status, data } = await getEventTypes();
+    expect(status).toBe(200);
+    expect(data).toEqual([{ id: 1, name: "15 мин", durationMinutes: 15 }]);
+    expect(mockFetch).toHaveBeenCalledWith("/api/event-types", {});
+  });
+
+  it("createEventType calls correct endpoint with body", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(JSON.stringify({ id: 3, name: "60 мин", durationMinutes: 60 }), { status: 201 }),
+    );
+
+    const body = { name: "60 мин", description: "Desc", durationMinutes: 60 };
+    const { status, data } = await createEventType({ body });
+    expect(status).toBe(201);
+    expect(data).toEqual({ id: 3, name: "60 мин", durationMinutes: 60 });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/event-types",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    );
   });
 });

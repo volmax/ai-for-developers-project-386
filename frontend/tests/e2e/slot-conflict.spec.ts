@@ -12,6 +12,10 @@ test.describe("Slot conflict — 409 Conflict", () => {
   }) => {
     // Step 1: Navigate to the booking page for "Консультация" (eventTypeId = 1)
     await page.goto("/events");
+
+    // Wait for events page to load (data is fetched asynchronously)
+    await page.waitForSelector("text=Загрузка...", { state: "hidden" });
+
     await expect(page.getByRole("heading", { name: "Выберите тип события" })).toBeVisible();
 
     await page.getByRole("link", { name: /Консультация.*15 мин/ }).click();

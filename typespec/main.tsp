@@ -159,11 +159,13 @@ interface EventTypes {
 @route("/api/bookings")
 @tag("Bookings")
 interface Bookings {
-  /** Создать бронирование (201/409) */
-  @post create(@body body: BookingRequest): BookingCreated | BookingConflict;
+  /** Создать бронирование (201/400/409) */
+  @post create(@body body: BookingRequest): BookingCreated | BookingConflict | ErrorResponse;
 
   /** Получить предстоящие встречи */
-  @get upcoming(): Booking[] | ErrorResponse;
+  @get
+  @route("upcoming")
+  upcoming(): Booking[] | ErrorResponse;
 
   /** Получить доступные слоты */
   @get

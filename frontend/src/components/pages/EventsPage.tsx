@@ -14,7 +14,7 @@ export function EventsPage() {
 
     async function fetchEventTypes() {
       try {
-        const data = await getEventTypes();
+        const { data } = await getEventTypes({});
         if (!cancelled) {
           setEventTypes(data);
           setIsLoading(false);

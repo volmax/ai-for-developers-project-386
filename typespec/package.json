@@ -12,7 +12,8 @@
     "@typespec/http": "1.18.0",
     "@typespec/openapi3": "1.18.0",
     "@typespec/rest": "0.88.0",
-    "openapi-typescript": "7.5.0"
+    "openapi-typescript": "7.5.0",
+    "openapi-typescript-fetch": "2.2.1"
   },
   "devDependencies": {
     "@typespec/versioning": "0.88.0"

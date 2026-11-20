@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+declare global {
+  // eslint-disable-next-line no-var
+  var mockFetch: ReturnType<typeof vi.fn>;
+}
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { EventsPage } from "@/components/pages/EventsPage";
 
-const mockGetEventTypes = vi.fn();
-
-vi.mock("@/services/api", () => ({
-  getEventTypes: (...args: unknown[]) => mockGetEventTypes(...args),
-}));
+const mockFetch = globalThis.mockFetch as ReturnType<typeof vi.fn>;
 
 function renderPage() {
   render(
@@ -24,27 +25,32 @@ describe("EventsPage", () => {
   });
 
   it("отображает 'Загрузка...' при загрузке", () => {
-    mockGetEventTypes.mockReturnValue(new Promise(() => {})); // never resolves
+    mockFetch.mockReturnValue(new Promise(() => {}));
 
     renderPage();
     expect(screen.getByText(/загрузка/i)).toBeInTheDocument();
   });
 
   it("отображает карточки событий после загрузки", async () => {
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события для быстрого слота",
-        durationMinutes: 15,
-      },
-      {
-        id: 2,
-        name: "Встреча 30 минут",
-        description: "Базовый тип события для бронирования",
-        durationMinutes: 30,
-      },
-    ]);
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify([
+          {
+            id: 1,
+            name: "Встреча 15 минут",
+            description: "Короткий тип события для быстрого слота",
+            durationMinutes: 15,
+          },
+          {
+            id: 2,
+            name: "Встреча 30 минут",
+            description: "Базовый тип события для бронирования",
+            durationMinutes: 30,
+          },
+        ]),
+        { status: 200 },
+      ),
+    );
 
     renderPage();
 
@@ -55,7 +61,6 @@ describe("EventsPage", () => {
       screen.getByText("Нажмите на карточку, чтобы открыть календарь и выбрать удобный слот"),
     ).toBeInTheDocument();
 
-    // Verify both event cards are rendered
     expect(screen.getByText("Встреча 15 минут")).toBeInTheDocument();
     expect(screen.getByText("15 мин")).toBeInTheDocument();
     expect(screen.getByText("Короткий тип события для быстрого слота")).toBeInTheDocument();
@@ -66,32 +71,35 @@ describe("EventsPage", () => {
   });
 
   it("переходит на /booking/:eventTypeId при клике на карточку", async () => {
-    mockGetEventTypes.mockResolvedValue([
-      {
-        id: 1,
-        name: "Встреча 15 минут",
-        description: "Короткий тип события",
-        durationMinutes: 15,
-      },
-    ]);
+    mockFetch.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify([
+          {
+            id: 1,
+            name: "Встреча 15 минут",
+            description: "Короткий тип события",
+            durationMinutes: 15,
+          },
+        ]),
+        { status: 200 },
+      ),
+    );
 
     const user = userEvent.setup();
     renderPage();
 
     await waitFor(() => expect(screen.queryByText("Загрузка...")).not.toBeInTheDocument());
 
-    // Click on the card link
     const link = screen.getByRole("link", { name: /встреча 15 минут/i });
     expect(link).toHaveAttribute("href", "/booking/1");
 
     await user.click(link);
 
-    // MemoryRouter doesn't actually navigate in tests, but we can verify the link href
     expect(link).toHaveAttribute("href", "/booking/1");
   });
 
   it("отображает сообщение об ошибке при ошибке загрузки", async () => {
-    mockGetEventTypes.mockRejectedValue(new Error("Ошибка сети"));
+    mockFetch.mockRejectedValueOnce(new Error("Ошибка сети"));
 
     renderPage();
 
@@ -103,7 +111,7 @@ describe("EventsPage", () => {
   });
 
   it("отображает 'Нет доступных событий', если список пуст", async () => {
-    mockGetEventTypes.mockResolvedValue([]);
+    mockFetch.mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }));
 
     renderPage();
 

@@ -10,7 +10,7 @@ paths:
   /api/bookings:
     post:
       operationId: Bookings_create
-      description: Создать бронирование (201/409)
+      description: Создать бронирование (201/400/409)
       parameters: []
       responses:
         '201':
@@ -25,27 +25,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingConflict'
-      tags:
-        - Bookings
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookingRequest'
-    get:
-      operationId: Bookings_upcoming
-      description: Получить предстоящие встречи
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Booking'
         default:
           description: An unexpected error response.
           content:
@@ -54,6 +33,12 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       tags:
         - Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
   /api/bookings/available-slots:
     get:
       operationId: Bookings_availableSlots
@@ -112,6 +97,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FreeSlotsCountResult'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - Bookings
+  /api/bookings/upcoming:
+    get:
+      operationId: Bookings_upcoming
+      description: Получить предстоящие встречи
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'
         default:
           description: An unexpected error response.
           content:
