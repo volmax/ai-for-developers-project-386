@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.14](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.13...v0.1.14) (2026-11-20)
+
+
+### Features
+
+* **booking:** добавить владельцу возможность создавать типы встреч ([#55](https://github.com/volmax/ai-for-developers-project-386/issues/55)) ([#65](https://github.com/volmax/ai-for-developers-project-386/issues/65)) ([7100a77](https://github.com/volmax/ai-for-developers-project-386/commit/7100a77b7d639ba229850bd5bd03f168108d71c2))
+* **docs:** добавить ссылку на опубликованное приложение и MCP-конфигурацию ([#54](https://github.com/volmax/ai-for-developers-project-386/issues/54)) ([#63](https://github.com/volmax/ai-for-developers-project-386/issues/63)) ([4630985](https://github.com/volmax/ai-for-developers-project-386/commit/46309855da76172602cefa38e44c6caf53cd12dc))
+* **e2e:** add admin reset endpoint and improve E2E tests ([#68](https://github.com/volmax/ai-for-developers-project-386/issues/68)) ([ad0b1a9](https://github.com/volmax/ai-for-developers-project-386/commit/ad0b1a9b24896f973d6a6495947669372a9aaa8d))
+
+
+### Bug Fixes
+
+* **api:** согласовать TypeSpec, сервер и клиент — сгенерировать SDK-функции ([#58](https://github.com/volmax/ai-for-developers-project-386/issues/58)) ([#70](https://github.com/volmax/ai-for-developers-project-386/issues/70)) ([6b3644c](https://github.com/volmax/ai-for-developers-project-386/commit/6b3644c394d406bae77e2b84638e863dd94490f5))
+* **booking:** защита от race condition через UNIQUE индекс и валидация рабочих часов ([#66](https://github.com/volmax/ai-for-developers-project-386/issues/66)) ([51b91e4](https://github.com/volmax/ai-for-developers-project-386/commit/51b91e430569bcbc263a421bdc0c5198d4414db2))
+* **test:** make tests timezone-independent and fix E2E flakiness ([#69](https://github.com/volmax/ai-for-developers-project-386/issues/69)) ([#69](https://github.com/volmax/ai-for-developers-project-386/issues/69)) ([41b30ef](https://github.com/volmax/ai-for-developers-project-386/commit/41b30ef324969731fe6460aa1473784599f6e40f))
+
 ## [0.1.13](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.12...v0.1.13) (2026-11-19)
 
 
