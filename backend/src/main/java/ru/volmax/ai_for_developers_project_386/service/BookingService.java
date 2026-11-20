@@ -1,10 +1,10 @@
 package ru.volmax.ai_for_developers_project_386.service;
 
+import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,20 +22,23 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final EventTypeRepository eventTypeRepository;
     private final SlotService slotService;
+    private final Clock clock;
 
     public BookingService(
             BookingRepository bookingRepository,
             EventTypeRepository eventTypeRepository,
-            SlotService slotService) {
+            SlotService slotService,
+            Clock clock) {
         this.bookingRepository = bookingRepository;
         this.eventTypeRepository = eventTypeRepository;
         this.slotService = slotService;
+        this.clock = clock;
     }
 
     /** Create a new booking with pessimistic locking to prevent concurrent double-booking. */
     public Booking create(BookingRequest request) {
         // A. Validate booking window: tomorrow (inclusive) to 14 days from tomorrow (inclusive)
-        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDate today = LocalDate.ofInstant(clock.instant(), clock.getZone());
         LocalDate windowStart = today.plusDays(1);
         LocalDate windowEnd = today.plusDays(15).minusDays(1);
 
@@ -92,7 +95,7 @@ public class BookingService {
                         slotEnd,
                         request.getGuestName(),
                         request.getGuestEmail(),
-                        LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                        LocalDateTime.ofInstant(clock.instant(), clock.getZone()));
 
         try {
             return bookingRepository.save(booking);
@@ -139,7 +142,7 @@ public class BookingService {
 
     /** Get upcoming bookings (today and future). */
     public List<Booking> getUpcoming() {
-        LocalDate today = LocalDate.now(ZoneId.of("Europe/Moscow"));
+        LocalDate today = LocalDate.ofInstant(clock.instant(), clock.getZone());
         LocalDateTime fromDateTime = today.atStartOfDay();
         return bookingRepository.findUpcomingBookings(fromDateTime);
     }
