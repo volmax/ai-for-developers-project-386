@@ -36,7 +36,7 @@ export type Booking = components["schemas"]["Booking"];
 export type EventType = components["schemas"]["EventType"];
 export type BookingRequest = components["schemas"]["BookingRequest"];
 
-export async function getUpcomingBookings(): Promise<{
+export async function getUpcomingBookings(_params?: {}): Promise<{
   status: number;
   data: Booking[];
 }> {
@@ -71,7 +71,7 @@ export async function getFreeSlotsCount(params: {
   );
 }
 
-export async function getEventTypes(): Promise<{
+export async function getEventTypes(_params?: {}): Promise<{
   status: number;
   data: EventType[];
 }> {
