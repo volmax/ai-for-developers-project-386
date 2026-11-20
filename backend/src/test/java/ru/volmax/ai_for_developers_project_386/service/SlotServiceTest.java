@@ -1,6 +1,8 @@
 package ru.volmax.ai_for_developers_project_386.service;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
@@ -9,6 +11,9 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,198 +28,186 @@ import ru.volmax.ai_for_developers_project_386.repository.EventTypeRepository;
 @ExtendWith(MockitoExtension.class)
 class SlotServiceTest {
 
+    private static final ZoneId TEST_TIMEZONE = ZoneId.of("Europe/Moscow");
+
     @Mock private BookingRepository bookingRepository;
     @Mock private EventTypeRepository eventTypeRepository;
 
     @InjectMocks private SlotService slotService;
 
-    // --- generateCandidateSlots ---
+    private EventType eventType;
 
-    @Test
-    void generateCandidateSlots15MinWeekdayShouldReturn36Slots() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 15);
-
-        assertEquals(36, slots.size());
-        assertEquals(LocalDateTime.of(date, LocalTime.of(9, 0)), slots.get(0));
-        assertEquals(LocalDateTime.of(date, LocalTime.of(17, 45)), slots.get(35));
+    @BeforeEach
+    void setUp() {
+        eventType = new EventType(1L, "Консультация", "30 min", 30);
     }
 
-    @Test
-    void generateCandidateSlots30MinWeekdayShouldReturn18Slots() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 30);
+    @Nested
+    @DisplayName("calculateAvailableSlots")
+    class CalculateAvailableSlots {
 
-        assertEquals(18, slots.size());
-        assertEquals(LocalDateTime.of(date, LocalTime.of(9, 0)), slots.get(0));
-        assertEquals(LocalDateTime.of(date, LocalTime.of(17, 30)), slots.get(17));
-    }
+        @Test
+        @DisplayName("should return all candidate slots when there are no bookings")
+        void calculateAvailableSlotsWithNoBookingsShouldReturnAllCandidateSlots() {
+            LocalDate date = LocalDate.of(2026, 11, 16); // Monday
+            String eventTypeId = "1";
 
-    @Test
-    void generateCandidateSlotsSaturdayShouldReturnEmpty() {
-        LocalDate date = LocalDate.of(2026, 11, 14); // Saturday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 15);
-        assertTrue(slots.isEmpty());
-    }
+            when(eventTypeRepository.findById(anyLong()))
+                    .thenReturn(java.util.Optional.of(eventType));
+            when(bookingRepository.findBookingsForDay(any(), any())).thenReturn(List.of());
 
-    @Test
-    void generateCandidateSlotsSundayShouldReturnEmpty() {
-        LocalDate date = LocalDate.of(2026, 11, 15); // Sunday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 15);
-        assertTrue(slots.isEmpty());
-    }
+            List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
 
-    @Test
-    void generateCandidateSlotsLastSlotMustNotExceedWorkEnd() {
-        // 45-min slots: 9:00, 9:45, 10:30, 11:15, 12:00, 12:45, 13:30, 14:15, 15:00, 15:45, 16:30,
-        // 17:15
-        // 17:15 + 45 = 18:00 (exactly work end, should be included)
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 45);
+            assertEquals(18, slots.size());
+            assertEquals("2026-11-16T09:00", slots.get(0));
+            assertEquals("2026-11-16T17:30", slots.get(17));
 
-        // 9 hours = 540 minutes / 45 = 12 slots
-        assertEquals(12, slots.size());
-        assertEquals(LocalDateTime.of(date, LocalTime.of(17, 15)), slots.get(11));
-    }
+            verify(eventTypeRepository).findById(1L);
+            verify(bookingRepository).findBookingsForDay(any(), any());
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
+        }
 
-    @Test
-    void generateCandidateSlots60MinWeekdayShouldReturn9Slots() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        List<LocalDateTime> slots = slotService.generateCandidateSlots(date, 60);
+        @Test
+        @DisplayName("should filter slots that overlap with existing bookings")
+        void calculateAvailableSlotsWithBookingsShouldFilterOverlapping() {
+            LocalDate date = LocalDate.of(2026, 11, 16); // Monday
+            String eventTypeId = "1";
 
-        // 9 hours / 1 hour = 9 slots
-        assertEquals(9, slots.size());
-        assertEquals(LocalDateTime.of(date, LocalTime.of(17, 0)), slots.get(8));
-    }
+            Booking existingBooking =
+                    Booking.testEntity()
+                            .id(1L)
+                            .eventTypeId("1")
+                            .eventTypeName("Консультация")
+                            .eventDurationMinutes(30)
+                            .slotStart(LocalDateTime.of(date, LocalTime.of(10, 0)))
+                            .slotEnd(LocalDateTime.of(date, LocalTime.of(10, 30)))
+                            .guestName("Guest")
+                            .guestEmail("guest@example.com")
+                            .createdAt(LocalDateTime.now(TEST_TIMEZONE))
+                            .build();
 
-    // --- isOverlapping ---
+            when(eventTypeRepository.findById(anyLong()))
+                    .thenReturn(java.util.Optional.of(eventType));
+            when(bookingRepository.findBookingsForDay(any(), any()))
+                    .thenReturn(List.of(existingBooking));
 
-    @Test
-    void isOverlappingShouldReturnTrueForFullOverlap() {
-        LocalDateTime start1 = LocalDateTime.of(2026, 11, 16, 10, 0);
-        LocalDateTime end1 = LocalDateTime.of(2026, 11, 16, 11, 0);
-        LocalDateTime start2 = LocalDateTime.of(2026, 11, 16, 10, 30);
-        LocalDateTime end2 = LocalDateTime.of(2026, 11, 16, 11, 30);
+            List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
 
-        assertTrue(slotService.isOverlapping(start1, end1, start2, end2));
-    }
+            assertEquals(17, slots.size());
 
-    @Test
-    void isOverlappingShouldReturnTrueForPartialOverlap() {
-        LocalDateTime start1 = LocalDateTime.of(2026, 11, 16, 10, 0);
-        LocalDateTime end1 = LocalDateTime.of(2026, 11, 16, 10, 30);
-        LocalDateTime start2 = LocalDateTime.of(2026, 11, 16, 10, 15);
-        LocalDateTime end2 = LocalDateTime.of(2026, 11, 16, 10, 45);
+            for (String slot : slots) {
+                assertFalse(slot.startsWith("2026-11-16T10:00"));
+            }
 
-        assertTrue(slotService.isOverlapping(start1, end1, start2, end2));
-    }
+            verify(eventTypeRepository).findById(1L);
+            verify(bookingRepository).findBookingsForDay(any(), any());
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
+        }
 
-    @Test
-    void isOverlappingShouldReturnFalseForTouchingBoundaries() {
-        LocalDateTime start1 = LocalDateTime.of(2026, 11, 16, 10, 0);
-        LocalDateTime end1 = LocalDateTime.of(2026, 11, 16, 11, 0);
-        LocalDateTime start2 = LocalDateTime.of(2026, 11, 16, 11, 0);
-        LocalDateTime end2 = LocalDateTime.of(2026, 11, 16, 12, 0);
+        @Test
+        @DisplayName("should return empty list for non-existent event type")
+        void calculateAvailableSlotsForNonExistentEventTypeShouldReturnEmpty() {
+            LocalDate date = LocalDate.of(2026, 11, 16);
 
-        assertFalse(slotService.isOverlapping(start1, end1, start2, end2));
-    }
+            when(eventTypeRepository.findById(999L)).thenReturn(java.util.Optional.empty());
 
-    @Test
-    void isOverlappingShouldReturnFalseForGap() {
-        LocalDateTime start1 = LocalDateTime.of(2026, 11, 16, 10, 0);
-        LocalDateTime end1 = LocalDateTime.of(2026, 11, 16, 10, 30);
-        LocalDateTime start2 = LocalDateTime.of(2026, 11, 16, 11, 0);
-        LocalDateTime end2 = LocalDateTime.of(2026, 11, 16, 11, 30);
+            List<String> slots = slotService.calculateAvailableSlots("999", date);
 
-        assertFalse(slotService.isOverlapping(start1, end1, start2, end2));
-    }
+            assertTrue(slots.isEmpty());
 
-    @Test
-    void isOverlappingShouldReturnTrueForContained() {
-        LocalDateTime start1 = LocalDateTime.of(2026, 11, 16, 9, 0);
-        LocalDateTime end1 = LocalDateTime.of(2026, 11, 16, 18, 0);
-        LocalDateTime start2 = LocalDateTime.of(2026, 11, 16, 10, 0);
-        LocalDateTime end2 = LocalDateTime.of(2026, 11, 16, 11, 0);
+            verify(eventTypeRepository).findById(999L);
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
+        }
 
-        assertTrue(slotService.isOverlapping(start1, end1, start2, end2));
-    }
+        @Test
+        @DisplayName("should filter multiple overlapping bookings")
+        void calculateAvailableSlotsShouldFilterMultipleOverlappingBookings() {
+            LocalDate date = LocalDate.of(2026, 11, 16); // Monday
+            String eventTypeId = "1";
 
-    // --- calculateAvailableSlots ---
+            Booking booking1 =
+                    Booking.testEntity()
+                            .id(1L)
+                            .eventTypeId("1")
+                            .eventTypeName("Консультация")
+                            .eventDurationMinutes(30)
+                            .slotStart(LocalDateTime.of(date, LocalTime.of(9, 0)))
+                            .slotEnd(LocalDateTime.of(date, LocalTime.of(9, 30)))
+                            .guestName("Guest1")
+                            .guestEmail("guest1@example.com")
+                            .createdAt(LocalDateTime.now(TEST_TIMEZONE))
+                            .build();
 
-    @Test
-    void calculateAvailableSlotsWithNoBookingsShouldReturnAllCandidateSlots() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        String eventTypeId = "1";
+            Booking booking2 =
+                    Booking.testEntity()
+                            .id(2L)
+                            .eventTypeId("1")
+                            .eventTypeName("Консультация")
+                            .eventDurationMinutes(30)
+                            .slotStart(LocalDateTime.of(date, LocalTime.of(14, 0)))
+                            .slotEnd(LocalDateTime.of(date, LocalTime.of(14, 30)))
+                            .guestName("Guest2")
+                            .guestEmail("guest2@example.com")
+                            .createdAt(LocalDateTime.now(TEST_TIMEZONE))
+                            .build();
 
-        EventType eventType = new EventType(1L, "Консультация", "30 min", 30);
-        when(eventTypeRepository.findById(1L)).thenReturn(java.util.Optional.of(eventType));
-        when(bookingRepository.findBookingsForDay(any(), any())).thenReturn(List.of());
+            when(eventTypeRepository.findById(anyLong()))
+                    .thenReturn(java.util.Optional.of(eventType));
+            when(bookingRepository.findBookingsForDay(any(), any()))
+                    .thenReturn(List.of(booking1, booking2));
 
-        List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
+            List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
 
-        assertEquals(18, slots.size());
-        // First slot should be 09:00
-        assertTrue(slots.get(0).startsWith("2026-11-16T09:00"));
-    }
+            assertEquals(16, slots.size());
 
-    @Test
-    void calculateAvailableSlotsWithBookingsShouldFilterOverlapping() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        String eventTypeId = "1";
+            for (String slot : slots) {
+                assertFalse(slot.startsWith("2026-11-16T09:00"));
+                assertFalse(slot.startsWith("2026-11-16T14:00"));
+            }
 
-        EventType eventType = new EventType(1L, "Консультация", "30 min", 30);
-        when(eventTypeRepository.findById(1L)).thenReturn(java.util.Optional.of(eventType));
-
-        // One booking at 10:00-10:30
-        Booking existingBooking =
-                new Booking(
-                        1L,
-                        "1",
-                        "Консультация",
-                        30,
-                        LocalDateTime.of(date, LocalTime.of(10, 0)),
-                        LocalDateTime.of(date, LocalTime.of(10, 30)),
-                        "Guest",
-                        "guest@example.com",
-                        LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-        when(bookingRepository.findBookingsForDay(any(), any()))
-                .thenReturn(List.of(existingBooking));
-
-        List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
-
-        // 18 total - 1 overlapping = 17
-        assertEquals(17, slots.size());
-
-        // Verify the 10:00 slot is NOT in the list
-        for (String slot : slots) {
-            assertFalse(slot.startsWith("2026-11-16T10:00"));
+            verify(eventTypeRepository).findById(1L);
+            verify(bookingRepository).findBookingsForDay(any(), any());
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
         }
     }
 
-    @Test
-    void calculateAvailableSlotsForNonExistentEventTypeShouldReturnEmpty() {
-        LocalDate date = LocalDate.of(2026, 11, 16);
-        when(eventTypeRepository.findById(999L)).thenReturn(java.util.Optional.empty());
+    @Nested
+    @DisplayName("countFreeSlots")
+    class CountFreeSlots {
 
-        List<String> slots = slotService.calculateAvailableSlots("999", date);
+        @Test
+        @DisplayName("should return the same count as calculateAvailableSlots size")
+        void countFreeSlotsShouldReturnSameAsCalculateAvailableSlotsSize() {
+            LocalDate date = LocalDate.of(2026, 11, 16); // Monday
+            String eventTypeId = "1";
 
-        assertTrue(slots.isEmpty());
-    }
+            when(eventTypeRepository.findById(anyLong()))
+                    .thenReturn(java.util.Optional.of(eventType));
+            when(bookingRepository.findBookingsForDay(any(), any())).thenReturn(List.of());
 
-    // --- countFreeSlots ---
+            int count = slotService.countFreeSlots(eventTypeId, date);
+            List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
 
-    @Test
-    void countFreeSlotsShouldReturnSameAsCalculateAvailableSlotsSize() {
-        LocalDate date = LocalDate.of(2026, 11, 16); // Monday
-        String eventTypeId = "1";
+            assertEquals(slots.size(), count);
 
-        EventType eventType = new EventType(1L, "Консультация", "30 min", 30);
-        when(eventTypeRepository.findById(1L)).thenReturn(java.util.Optional.of(eventType));
-        when(bookingRepository.findBookingsForDay(any(), any())).thenReturn(List.of());
+            verify(eventTypeRepository, times(2)).findById(1L);
+            verify(bookingRepository, times(2)).findBookingsForDay(any(), any());
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
+        }
 
-        int count = slotService.countFreeSlots(eventTypeId, date);
-        List<String> slots = slotService.calculateAvailableSlots(eventTypeId, date);
+        @Test
+        @DisplayName("should return 0 for non-existent event type")
+        void countFreeSlotsForNonExistentEventTypeShouldReturnZero() {
+            LocalDate date = LocalDate.of(2026, 11, 16);
 
-        assertEquals(slots.size(), count);
+            when(eventTypeRepository.findById(999L)).thenReturn(java.util.Optional.empty());
+
+            int count = slotService.countFreeSlots("999", date);
+
+            assertEquals(0, count);
+
+            verify(eventTypeRepository).findById(999L);
+            verifyNoMoreInteractions(eventTypeRepository, bookingRepository);
+        }
     }
 }

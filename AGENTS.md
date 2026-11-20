@@ -55,6 +55,15 @@ mise run fix        # авто-исправление: spotless:apply + oxfmt
 
 - Всё зафиксировано в `mise.toml`
 
+## Coding Standards
+
+Полные правила качества кода и тестирования: `CODING_STANDARDS.md`.
+
+Основные:
+- Тесты сервисов — чистые unit-тесты с моками, без Spring Boot контекста
+- Тестовые сущности — `testEntity()` builder
+- Временные зависимости — `Clock` injection
+
 ## Playwright E2E-тесты
 
 - Использовать **только** MCP-сервер `playwright-docker`. Не запускать `npx playwright test` напрямую.

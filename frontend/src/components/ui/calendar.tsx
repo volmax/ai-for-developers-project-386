@@ -62,6 +62,9 @@ export function Calendar({
     tomorrow.setDate(tomorrow.getDate() + 1);
     const windowEnd = new Date(bookingWindowEnd);
     windowEnd.setHours(0, 0, 0, 0);
+    // Skip weekends (Saturday=6, Sunday=0 in JS)
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) return true;
     return date < tomorrow || date > windowEnd;
   };
 
