@@ -36,7 +36,7 @@ class BookingControllerTest {
     void createBookingShouldReturn201() throws Exception {
         LocalDateTime slotStart =
                 LocalDateTime.now(ZoneId.of("Europe/Moscow"))
-                        .plusDays(1)
+                        .plusDays(7)
                         .withHour(10)
                         .withMinute(0);
         String json =
@@ -66,7 +66,7 @@ class BookingControllerTest {
     void createOverlappingBookingShouldReturn409() throws Exception {
         LocalDateTime slotStart =
                 LocalDateTime.now(ZoneId.of("Europe/Moscow"))
-                        .plusDays(1)
+                        .plusDays(7)
                         .withHour(10)
                         .withMinute(0);
         String json1 =
@@ -115,7 +115,7 @@ class BookingControllerTest {
 
     @Test
     void availableSlotsShouldReturn200WithSlots() throws Exception {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = LocalDate.now().plusDays(7);
         mockMvc.perform(
                         get("/api/bookings/available-slots")
                                 .param("eventTypeId", "1")
@@ -126,7 +126,7 @@ class BookingControllerTest {
 
     @Test
     void freeSlotsCountShouldReturn200WithCount() throws Exception {
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate tomorrow = LocalDate.now().plusDays(7);
         mockMvc.perform(
                         get("/api/bookings/free-slots-count")
                                 .param("eventTypeId", "1")
@@ -140,7 +140,7 @@ class BookingControllerTest {
     void createBookingWithEmptyGuestNameShouldReturn400() throws Exception {
         LocalDateTime slotStart =
                 LocalDateTime.now(ZoneId.of("Europe/Moscow"))
-                        .plusDays(1)
+                        .plusDays(7)
                         .withHour(10)
                         .withMinute(0);
         String json =
@@ -163,7 +163,7 @@ class BookingControllerTest {
     void createBookingWithWhitespaceGuestNameShouldReturn400() throws Exception {
         LocalDateTime slotStart =
                 LocalDateTime.now(ZoneId.of("Europe/Moscow"))
-                        .plusDays(1)
+                        .plusDays(7)
                         .withHour(10)
                         .withMinute(0);
         String json =
@@ -186,7 +186,7 @@ class BookingControllerTest {
     void createBookingWithInvalidEmailShouldReturn400() throws Exception {
         LocalDateTime slotStart =
                 LocalDateTime.now(ZoneId.of("Europe/Moscow"))
-                        .plusDays(1)
+                        .plusDays(7)
                         .withHour(10)
                         .withMinute(0);
         String json =

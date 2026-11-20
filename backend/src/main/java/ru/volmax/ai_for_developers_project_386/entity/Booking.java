@@ -6,6 +6,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import lombok.Builder;
+
 @Table("booking")
 public class Booking {
 
@@ -37,6 +39,7 @@ public class Booking {
     @Column("created_at")
     private LocalDateTime createdAt;
 
+    @Builder(builderMethodName = "testEntity")
     public Booking(
             Long id,
             String eventTypeId,
