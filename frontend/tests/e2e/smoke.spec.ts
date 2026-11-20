@@ -45,7 +45,10 @@ test.describe("Smoke Test — полный путь бронирования", (
 
     // Step 5: Select a time slot
     // Wait for slots to load after date selection
-    await page.waitForTimeout(1000);
+    await page
+      .getByRole("button", { name: /Свободно/ })
+      .first()
+      .waitFor({ timeout: 10000 });
 
     // Click the first available slot
     const firstSlot = page.getByRole("button", { name: /Свободно/ }).first();

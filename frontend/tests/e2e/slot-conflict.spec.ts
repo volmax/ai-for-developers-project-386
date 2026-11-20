@@ -24,7 +24,10 @@ test.describe("Slot conflict — 409 Conflict", () => {
     await expect(page.getByText("Выбранная дата")).toBeVisible();
 
     // Step 3: Wait for slots to load and select the first available slot
-    await page.waitForTimeout(1000);
+    await page
+      .getByRole("button", { name: /Свободно/ })
+      .first()
+      .waitFor({ timeout: 10000 });
     const firstSlot = page.getByRole("button", { name: /Свободно/ }).first();
     await expect(firstSlot).toBeVisible();
     await firstSlot.click();
@@ -83,7 +86,10 @@ test.describe("Slot conflict — 409 Conflict", () => {
     // Step 9: Select the same date and verify the pre-booked slot is not available.
     const dateCells = page.getByRole("button").filter({ hasText: /\d+ св\./ });
     await dateCells.first().click();
-    await page.waitForTimeout(1000);
+    await page
+      .getByRole("button", { name: /Свободно/ })
+      .first()
+      .waitFor({ timeout: 10000 });
 
     // Verify the pre-booked slot time (e.g. "09:15") does NOT appear in available slots.
     const availableSlotTimes = await page.evaluate(() => {
@@ -144,7 +150,10 @@ test.describe("Slot conflict — 409 Conflict", () => {
 
     const finalDateCells = page.getByRole("button").filter({ hasText: /\d+ св\./ });
     await finalDateCells.first().click();
-    await page.waitForTimeout(1000);
+    await page
+      .getByRole("button", { name: /Свободно/ })
+      .first()
+      .waitFor({ timeout: 10000 });
 
     const finalSlotBtn = page.getByRole("button", { name: /Свободно/ }).first();
     await expect(finalSlotBtn).toBeVisible();
