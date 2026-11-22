@@ -22,7 +22,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@ee5fe34e136488a1839ac73bcca8321c51a31b75 # v6.0.0 (latest)
+        uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3 (pinned SHA)
         with:
           fetch-depth: 1
           persist-credentials: false
