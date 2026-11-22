@@ -86,7 +86,7 @@ run = [
   "cd frontend && npm run lint",
   "cd frontend && npm run format",
   "cd frontend && npm run knip",
-  "mise x jactionlint -- jactionlint --ignore=pipeline-without-pipefail --ignore=unverified-download .github/workflows/ci.yml .github/workflows/hexlet-check.yml",
+  "mise x jactionlint -- jactionlint --ignore=pipeline-without-pipefail --ignore=unverified-download .github/workflows/ci.yml .github/workflows/hexlet-check.yml .github/workflows/opencode.yml",
   "mise x typos -- typos",
   "mise x betterleaks -- betterleaks dir . --no-banner",
   "mise x python -- check-jsonschema --schemafile frontend/node_modules/oxlint/configuration_schema.json frontend/oxlint.json",
