@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.15](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.14...v0.1.15) (2026-11-23)
+
+
+### Features
+
+* **ci:** add opencode github workflow with deepseek-v4.1-flash-free ([#73](https://github.com/volmax/ai-for-developers-project-386/issues/73)) ([788c0fd](https://github.com/volmax/ai-for-developers-project-386/commit/788c0fd85abe28cff246b58c3cda730451ac8e82))
+* **ci:** improve opencode workflow with pinned SHA and better triggers ([#0](https://github.com/volmax/ai-for-developers-project-386/issues/0)) ([#78](https://github.com/volmax/ai-for-developers-project-386/issues/78)) ([6935ad2](https://github.com/volmax/ai-for-developers-project-386/commit/6935ad255880e071f4160c44f59435e94ed0c921))
+
+
+### Bug Fixes
+
+* **ci:** exclude bot comments from opencode workflow trigger ([#77](https://github.com/volmax/ai-for-developers-project-386/issues/77)) ([b87a500](https://github.com/volmax/ai-for-developers-project-386/commit/b87a500d65231634e896481982857d390d9ad970))
+* **ci:** pin checkout action to verified SHA v6.0.3 ([#76](https://github.com/volmax/ai-for-developers-project-386/issues/76)) ([e1d8de5](https://github.com/volmax/ai-for-developers-project-386/commit/e1d8de51f0d7cd3951d914bb9c3604995debefa7))
+* **ci:** replace disabled deepseek-v4.1-flash-free model in opencode workflow ([#81](https://github.com/volmax/ai-for-developers-project-386/issues/81)) ([0f9f6e6](https://github.com/volmax/ai-for-developers-project-386/commit/0f9f6e63e4a83914a00762dbdebdbd1f38aec396))
+* **test:** use @TestBean to override Clock with fixed date in BookingControllerTest ([#79](https://github.com/volmax/ai-for-developers-project-386/issues/79)) ([7825672](https://github.com/volmax/ai-for-developers-project-386/commit/7825672e38ca5d5f3b588803cf681835ad55153f))
+* **workflows:** update opencode action SHA ([#6](https://github.com/volmax/ai-for-developers-project-386/issues/6)) ([#80](https://github.com/volmax/ai-for-developers-project-386/issues/80)) ([ff465a6](https://github.com/volmax/ai-for-developers-project-386/commit/ff465a6943d10d8323d56992ff3ea94aa8e23573))
+
 ## [0.1.14](https://github.com/volmax/ai-for-developers-project-386/compare/v0.1.13...v0.1.14) (2026-11-20)
 
 
